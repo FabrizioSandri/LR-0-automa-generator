@@ -56,7 +56,21 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
     // split della produzione in driver e body
     int bodyStartPosition;
     bool foundArrow = false;
+    
+    // ricerca di produzioni multi-defined (separate dalla | )
+    char newSeparatedProduction[MAX_PRODUCTION_BODY_LENGTH + 10] = "_ ->";
+    char* separatorOccurence = strchr(production, '|');
 
+    if(separatorOccurence){
+        separatorOccurence[0] = '\0'; // sostituisci la | con il carattere di fine stringa nella produzione
+        newSeparatedProduction[0] = production[0]; // copia del driver
+
+        strcat(newSeparatedProduction, separatorOccurence + 1); // aggiunta del body
+
+        addProduction(grammar, newSeparatedProduction, productions_count);
+    }
+
+    // ricerca del sibolo arrow "->""
     for (bodyStartPosition=1; bodyStartPosition<strlen(production); bodyStartPosition++){
         if (production[bodyStartPosition-1] == '-' && production[bodyStartPosition] == '>' ){
             bodyStartPosition++;
@@ -65,6 +79,7 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
         }
     }
 
+    // se e' una produzione valida
     if (foundArrow && isNonTerminal(production[0])){
         // rimozione spazi vuoti dalla produzione
         while(production[bodyStartPosition] == ' ' && bodyStartPosition < strlen(production)){
