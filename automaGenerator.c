@@ -18,6 +18,22 @@ struct lr0_item {
     bool isKernelProduction;  // utilizzata per capire se un item fa parte del kernel
 };
 
+struct transaction {
+    char from;
+    char by;
+    char destination;
+};
+
+struct automa_state {
+    struct lr0_item items[50];  
+    struct transaction transactions[50];
+    bool marked;
+    
+    int items_count;
+    int kernel_items_count;
+    int transaction_count;
+};
+
 bool isNonTerminal(char val){
     if (val >= 'A' && val <= 'Z'){
         return true;
@@ -73,6 +89,117 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
     }
 
     return false;
+}
+
+
+/**
+* conta il numero di produzioni targate come unmarked all'interno degli items dello stato state
+*/
+int countUnmarked(struct automa_state* state){
+    int count = 0;
+
+    for (int i=0; i<state->items_count; i++){
+        if (state->items[i].marked == false){
+            count ++;
+        }
+    }
+
+    return count;
+}
+
+/**
+* ottiene l'id di uno stato unMarked all'interno dell'automa specificato
+*/
+int getUnmarkedStateId(struct automa_state* automa, int numberOfStates){
+    int id = -1;
+
+    for (int i=0; i<numberOfStates; i++){
+        if (automa[i].marked == false){
+            id = i;
+            break;
+        }
+    }
+
+    return id;
+}
+
+/**
+* destination e' lo stato di destinazione delle closure da aggiungere
+*/
+void addProductionToClosure(struct automa_state* destinationState, struct lr0_item item){
+    int itemsInDestination = destinationState->items_count;
+
+    // controllo che l'item non sia gia presente nella closure. Un elemento e gia presente nella closure se ha lo stesso identificativo (stesso driver e stesso body)
+    // e se la posizione del marker e' la stessa
+    bool alreadyIn = false;
+    for (int i=0; i<itemsInDestination; i++){
+        if (destinationState->items[i].production_id == item.production_id && destinationState->items[i].marker_position == item.marker_position ){
+            alreadyIn = true;
+            break;
+        }
+    }
+
+    if (alreadyIn == false){ // aggiungo solo se non e' gia presente
+        destinationState->items[itemsInDestination] = item;
+        destinationState->items[itemsInDestination].marked = false;
+        destinationState->items[itemsInDestination].marker_position = 0;
+        destinationState->items[itemsInDestination].isKernelProduction = false;
+
+        destinationState->items_count++;
+    }
+    
+}
+
+// funzione utilizzata per aggiungere una produzione al kernel di uno stato (inizializza il kernel a partire dallo stato precedente item)
+void addProductionToKernel(struct automa_state* destinationState, struct lr0_item item){
+    int itemsInDestination = destinationState->items_count;
+
+    // controllo che l'item non sia gia presente nella closure. Un elemento e gia presente nella closure se ha lo stesso identificativo (stesso driver e stesso body)
+    // e se la posizione del marker e' la stessa
+    bool alreadyIn = false;
+    for (int i=0; i<itemsInDestination; i++){
+        if (destinationState->items[i].production_id == item.production_id && destinationState->items[i].marker_position == item.marker_position ){
+            alreadyIn = true;
+            break;
+        }
+    }
+
+    if (alreadyIn == false){ // aggiungo solo se non e' gia presente
+        destinationState->items[itemsInDestination] = item;
+        destinationState->items[itemsInDestination].marked = false;
+        destinationState->items[itemsInDestination].marker_position = item.marker_position + 1;
+        destinationState->items[itemsInDestination].isKernelProduction = true;
+
+        destinationState->items_count++;
+        destinationState->kernel_items_count++;
+    }
+    
+}
+
+
+void computeClosure(struct automa_state* state, struct lr0_item* grammar, int productions_count){
+
+    while(countUnmarked(state) != 0){
+
+        for (int i=0; i<state->items_count; i++){
+            if (state->items[i].marked == false){
+                state->items[i].marked = true;
+
+                // se contine un marker prima di un non terminale si fa la closure
+                int dot = state->items[i].marker_position;
+                char nextToDot = state->items[i].body[dot];
+                if (isNonTerminal(nextToDot)){
+                    for(int t=0; t<productions_count; t++){
+                        if (grammar[t].driver == nextToDot){
+                            addProductionToClosure(state, grammar[t]);
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    
 }
 
 int main(int argc, char** argv){
