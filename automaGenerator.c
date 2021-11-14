@@ -275,8 +275,9 @@ int getKernelEqualTo(struct automa_state* automa, int totalStates, int stateId, 
                     }
                 }
 
-                if (corrispondenza == false){
+                if (corrispondenza == false){  // nessuna corrispondenza per questa produzione del kernel, posso terminare, sicuramente e' uno stato nuovo
                     allEqual = false;
+                    break;
                 }
 
             }
@@ -448,7 +449,7 @@ int main(int argc, char** argv){
     addProduction(grammar, fresh_production, &productions_count);
 
     // leggo le produzioni una ad una
-    while (fgets(production, MAX_PRODUCTION_BODY_LENGTH + 10, stdin)[0] != '\n'){
+    while (fgets(production, MAX_PRODUCTION_BODY_LENGTH + 10, stdin) && production[0] != '\n'){
         // rimuovo il carattere newline e gli spazi
         production[strlen(production) - 1] = '\0';  
         removeSpaces(production);
