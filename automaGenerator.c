@@ -106,6 +106,21 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
 }
 
 /**
+* Rimuove gli spazi da una stringa, in questo caso da una produzione
+*/
+void removeSpaces(char* production){
+    int resultLen = 0;
+
+    for (int i=0; i<strlen(production); i++){
+        if (production[i] != ' '){
+            production[resultLen++] = production[i];
+        }
+    }
+    production[resultLen] = '\0';
+
+}
+
+/**
 * conta il numero di produzioni targate come unmarked all'interno degli items dello stato state
 */
 int countUnmarked(struct automa_state* state){
@@ -434,9 +449,10 @@ int main(int argc, char** argv){
 
     // leggo le produzioni una ad una
     while (fgets(production, MAX_PRODUCTION_BODY_LENGTH + 10, stdin)[0] != '\n'){
-        // rimuovo il carattere newline
+        // rimuovo il carattere newline e gli spazi
         production[strlen(production) - 1] = '\0';  
-        
+        removeSpaces(production);
+
         if (addProduction(grammar, production, &productions_count) == false){ 
             printf("La produzione non e' stata inserita in quanto non rispetta lo standard: A -> beta\n");
         }
