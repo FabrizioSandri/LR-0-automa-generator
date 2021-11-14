@@ -81,11 +81,7 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
 
     // se e' una produzione valida
     if (foundArrow && isNonTerminal(production[0])){
-        // rimozione spazi vuoti dalla produzione
-        while(production[bodyStartPosition] == ' ' && bodyStartPosition < strlen(production)){
-            bodyStartPosition++;
-        }
-
+        
         // Aggiungi la produzione alla grammatica separando driver e body
         grammar[*productions_count].driver = production[0];
         strcpy(grammar[*productions_count].body, (production + bodyStartPosition));
