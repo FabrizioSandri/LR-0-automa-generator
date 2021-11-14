@@ -7,7 +7,6 @@
 
 typedef enum { false, true } bool;
 
-
 struct lr0_item {
     char driver;
     char body[MAX_PRODUCTION_BODY_LENGTH];
@@ -90,7 +89,6 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
 
     return false;
 }
-
 
 /**
 * conta il numero di produzioni targate come unmarked all'interno degli items dello stato state
@@ -202,6 +200,204 @@ void computeClosure(struct automa_state* state, struct lr0_item* grammar, int pr
     
 }
 
+/**
+* Questa funzione permette di controllare se il kernel generato da uno stato "state" proseguendo con una transizione 
+* tramite "nextChar" e' gia presente tra quelli presenti nell'automa caratteristico. 
+* Se lo stato e' gia presente si ritorna l'identificativo dello stato
+*
+* Parametri:
+* - automa : l'automa caratteristico finale
+* - totalStates : numero di stati dell'automa caratteristico costruito fin'ora
+* - stateId : l'id dello stato sorgente. Si controllera' se questo stato e' gia presente nell'automa
+* - nextChar : il prossimo carattere della transizione (terminale o non terminale)
+*
+* Ritorna:
+* - id_stato : se si e' trovato uno stato con id stato_id e con kernel uguale gia presente 
+* - -1 : se non esiste ancora uno stato con quel kernel
+*/
+int getKernelEqualTo(struct automa_state* automa, int totalStates, int stateId, char nextChar){
+    int kernelEqualTo = -1;
+
+    struct lr0_item kernelOfState[MAX_GRAMMAR_PRODUCTIONS_NUMBER];
+    int stateIdKernelSize = 0;  // la dimensione del nuovo kernel effettuando una transizione con nextChar a partire da stateId
+
+    // estrai le produzione che faranno parte del kernel del nuovo stato partendo da stateId
+    for (int i=0; i<automa[stateId].items_count; i++){
+        int marker_pos = automa[stateId].items[i].marker_position;
+        char productionNextChar = automa[stateId].items[i].body[marker_pos];
+        
+        if (productionNextChar == nextChar){
+            kernelOfState[stateIdKernelSize++] = automa[stateId].items[i];
+        }
+    }
+
+    // cerca se il kernel del futuro nuovo stato e' gia presente nell'automa. Nel caso fosse gia presente ritorniamo subito l'id dello stato uguale
+    for (int t=0; t<totalStates; t++){
+        
+        if (stateIdKernelSize == automa[t].kernel_items_count){ // affinche' due kernel siano uguali devono avere come minimo lo stesso numero di produzioni
+            bool allEqual = true; 
+        
+            for (int kernelProd=0; kernelProd<stateIdKernelSize; kernelProd++){
+                bool corrispondenza = false;
+                for (int prod=0; prod<automa[t].items_count; prod++){
+                    if (automa[t].items[prod].production_id == kernelOfState[kernelProd].production_id && automa[t].items[prod].marker_position == kernelOfState[kernelProd].marker_position+1 && automa[t].items[prod].isKernelProduction){
+                        corrispondenza = true; // ho trovato una produzione dell'automa che matcha con quella del kernel  
+                    }
+                }
+
+                if (corrispondenza == false){
+                    allEqual = false;
+                }
+
+            }
+
+
+            if (allEqual == true){ // trovato
+                kernelEqualTo = t;
+                break;
+            }
+
+        }
+        
+    }
+    
+    return kernelEqualTo;
+}
+
+
+/**
+* Generazione dell'automa caratteristico,
+* Ritorna: il numero di stati dell'automa caratteristico
+*/
+int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, int productions_count){
+    int totalStates = 0; 
+
+    // le seguenti due variabili servono per tenere traccia del numero di nuovi stati aggiunti a partire da ogni stato :
+    // in particolare serviranno per evitare di creare un nuovo stato se esistesse gia
+    char alreadyAddedNextChar[MAX_PRODUCTION_BODY_LENGTH];
+    int addedStates = 0;
+
+    //////////////// INIZIALIZZAZIONE /////////////////
+    // aggiunta all'automa dello stato 0 con il suo kernel
+    struct automa_state state0 = {
+        .marked = false,
+        .items_count = 0,
+        .kernel_items_count = 1, // lo stato 0 contiene il kernel
+        .transaction_count = 0
+    };
+
+    addProductionToClosure(&state0, grammar[0]); // aggiunta produzione inziiale al kernel dello stato iniziale
+    automa[totalStates++] = state0;
+    automa[totalStates-1].items[0].isKernelProduction = true;  // il primo item fa parte del kernel
+
+    
+    /////////////// SVOLGIMENTO //////////////////
+    int unmarkedState = getUnmarkedStateId(automa, totalStates);
+    while (unmarkedState != -1) {   // finche esiste uno stato unmarked
+         
+        // closure del kernel dello stato unmarked (uno stato unmarked contiene solo il kernel)       
+        computeClosure(&automa[unmarkedState], grammar, productions_count);
+        
+        printf("++++++ Lo stato %d contiene: \n", unmarkedState);
+        for (int i=0; i<automa[unmarkedState].items_count; i++){ // aggiunta delle transizioni a partire dagli stati unmarked
+
+            // production e una produzione dello stato unmarked
+            struct lr0_item production = automa[unmarkedState].items[i];
+
+            /// STAMPA
+            printf("%c -> ", production.driver);
+            for (int t=0; t<strlen(production.body); t++){
+                if (t == production.marker_position){
+                    printf(".%c",production.body[t]);
+                }else{
+                    printf("%c",production.body[t]);
+                }
+            }
+            if (production.marker_position == strlen(production.body)){ // marker in ultima posizione
+                printf(".");
+            }
+            printf("\n");
+            /// FINE STAMPA
+            
+            int marker_pos = production.marker_position;
+            if (marker_pos < strlen(production.body)){ // se il marker non è in ultima posizione
+                bool alreadyAddedState = false;
+                char nextChar = production.body[marker_pos];
+
+                // duplicateStateOffset contiene l'offset dello stato uguale a partire dagli stati gia aggiunti per lo stato attuale preso in considerazione
+                int duplicateStateOffset;
+                // alreadyAddedStateId contiene l'indice dello stato convertito a partire dall'offset duplicateStateOffset
+                int alreadyAddedStateId;
+                for (duplicateStateOffset=0; duplicateStateOffset<addedStates; duplicateStateOffset++){
+                    if (nextChar == alreadyAddedNextChar[duplicateStateOffset]){
+                        alreadyAddedState = true;  // lo stato verso questo carattere e' gia stato inserito
+                        break;
+                    }
+                }
+
+
+                int kernelEqualTo = getKernelEqualTo(automa, totalStates, unmarkedState, nextChar);
+                if (kernelEqualTo != -1){ // kernel gia presente, aggiungi solo la transizione verso lo stato specificato da kernelEqualTo
+                    struct transaction newTransaction = {
+                        .from = unmarkedState,
+                        .by = production.body[marker_pos],  // il prossimo simbolo
+                        .destination = kernelEqualTo
+                    };
+
+                    
+                    printf("Tau (%d, %c) = %d \n", newTransaction.from, newTransaction.by, newTransaction.destination);
+                    automa[unmarkedState].transactions[automa[unmarkedState].transaction_count++] = newTransaction;
+
+                } else if (alreadyAddedState){ // se lo stato destinazione esiste gia allora aggiungo semplicemente la produzione al kernel 
+                    printf("La transizione verso il carattere %c e gia stata aggiunta\n", nextChar);
+                    alreadyAddedStateId = totalStates - addedStates + duplicateStateOffset;  
+                    addProductionToKernel(&automa[alreadyAddedStateId], production); // aggiunta produzione al kernel dello stato gia essitente
+                }else{
+                    alreadyAddedNextChar[addedStates++] = production.body[marker_pos];
+
+                    struct transaction newTransaction = {
+                        .from = unmarkedState,
+                        .by = production.body[marker_pos],  // il prossimo simbolo
+                        .destination = totalStates
+                    };
+
+                    
+                    printf("Tau (%d, %c) = %d \n", newTransaction.from, newTransaction.by, newTransaction.destination);
+                    automa[unmarkedState].transactions[automa[unmarkedState].transaction_count++] = newTransaction;
+
+                    // trovato nuovo stato, lo inizializziamo
+                    struct automa_state newState = {
+                        .marked = false,
+                        .items_count = 0,
+                        .kernel_items_count = 0,
+                        .transaction_count = 0
+                    };
+
+                    addProductionToKernel(&newState, production); // aggiunta del kernel al nuovo stato
+                    automa[totalStates++] = newState;
+
+                }
+
+                
+            }else{ // marker in ultima posizione
+                printf("reducing item\n");
+            }
+
+        }
+
+
+
+        automa[unmarkedState].marked = true;
+        unmarkedState = getUnmarkedStateId(automa, totalStates);
+    
+        addedStates = 0;  // reset del numero di nonTerminali gia aggiunti
+    }
+
+    return totalStates;
+
+}
+
+
 int main(int argc, char** argv){
     
     struct lr0_item grammar[MAX_GRAMMAR_PRODUCTIONS_NUMBER];
@@ -238,6 +434,12 @@ int main(int argc, char** argv){
     for (int i=0; i<productions_count; i++){
         printf("%c -> %s\n", grammar[i].driver, grammar[i].body);
     }
+
+    ////////////////////////// CREAZIONE AUTOMA //////////////////////////
+
+    printf("=================================\n");
+    struct automa_state automa[50];
+    generateAutomaChar(automa, grammar, productions_count);
 
     return(0);
 }
