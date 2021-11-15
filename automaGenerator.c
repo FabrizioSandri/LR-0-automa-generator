@@ -40,6 +40,22 @@ bool isNonTerminal(char val){
     return false;
 }
 
+
+/**
+* Rimuove gli spazi da una stringa, in questo caso da una produzione
+*/
+void removeSpaces(char* production){
+    int resultLen = 0;
+
+    for (int i=0; i<strlen(production); i++){
+        if (production[i] != ' '){
+            production[resultLen++] = production[i];
+        }
+    }
+    production[resultLen] = '\0';
+
+}
+
 /*
 * Funzione di supporto utilizzata per aggiungere una produzione alla grammatica data
 * 
@@ -57,6 +73,9 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
     int bodyStartPosition;
     bool foundArrow = false;
     
+    // rimozione degli spazi
+    removeSpaces(production);
+
     // ricerca di produzioni multi-defined (separate dalla | )
     char newSeparatedProduction[MAX_PRODUCTION_BODY_LENGTH + 10] = "_ ->";
     char* separatorOccurence = strchr(production, '|');
@@ -101,20 +120,6 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
     return false;
 }
 
-/**
-* Rimuove gli spazi da una stringa, in questo caso da una produzione
-*/
-void removeSpaces(char* production){
-    int resultLen = 0;
-
-    for (int i=0; i<strlen(production); i++){
-        if (production[i] != ' '){
-            production[resultLen++] = production[i];
-        }
-    }
-    production[resultLen] = '\0';
-
-}
 
 /**
 * conta il numero di produzioni targate come unmarked all'interno degli items dello stato state
@@ -325,27 +330,11 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
         // closure del kernel dello stato unmarked (uno stato unmarked contiene solo il kernel)       
         computeClosure(&automa[unmarkedState], grammar, productions_count);
         
-        printf("++++++ Lo stato %d contiene: \n", unmarkedState);
         for (int i=0; i<automa[unmarkedState].items_count; i++){ // aggiunta delle transizioni a partire dagli stati unmarked
 
             // production e una produzione dello stato unmarked
             struct lr0_item production = automa[unmarkedState].items[i];
 
-            /// STAMPA
-            printf("%c -> ", production.driver);
-            for (int t=0; t<strlen(production.body); t++){
-                if (t == production.marker_position){
-                    printf(".%c",production.body[t]);
-                }else{
-                    printf("%c",production.body[t]);
-                }
-            }
-            if (production.marker_position == strlen(production.body)){ // marker in ultima posizione
-                printf(".");
-            }
-            printf("\n");
-            /// FINE STAMPA
-            
             int marker_pos = production.marker_position;
             if (marker_pos < strlen(production.body)){ // se il marker non è in ultima posizione
                 bool alreadyAddedState = false;
@@ -376,7 +365,6 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
                     automa[unmarkedState].transactions[automa[unmarkedState].transaction_count++] = newTransaction;
 
                 } else if (alreadyAddedState){ // se lo stato destinazione esiste gia allora aggiungo semplicemente la produzione al kernel 
-                    printf("La transizione verso il carattere %c e gia stata aggiunta\n", nextChar);
                     alreadyAddedStateId = totalStates - addedStates + duplicateStateOffset;  
                     addProductionToKernel(&automa[alreadyAddedStateId], production); // aggiunta produzione al kernel dello stato gia essitente
                 }else{
@@ -432,7 +420,8 @@ int main(int argc, char** argv){
 
     char production[MAX_PRODUCTION_BODY_LENGTH + 10];
     int productions_count = 0;
-    
+    int totalStates;
+
     if (argc != 2) {
         printf("Use %s <start_symbol>\n", argv[0]);
         exit(0);
@@ -448,7 +437,6 @@ int main(int argc, char** argv){
     while (fgets(production, MAX_PRODUCTION_BODY_LENGTH + 10, stdin) && production[0] != '\n'){
         // rimuovo il carattere newline e gli spazi
         production[strlen(production) - 1] = '\0';  
-        removeSpaces(production);
 
         if (addProduction(grammar, production, &productions_count) == false){ 
             printf("La produzione non e' stata inserita in quanto non rispetta lo standard: A -> beta\n");
@@ -456,9 +444,8 @@ int main(int argc, char** argv){
 
     }
 
-
-    printf("=====================  %d produzioni \n", productions_count);
-    // DEBUG
+    /////////////////////// STAMPA PRODUZIONI LETTE ///////////////////////
+    printf("=================================  %d produzioni \n", productions_count);
     for (int i=0; i<productions_count; i++){
         printf("%c -> %s\n", grammar[i].driver, grammar[i].body);
     }
@@ -467,7 +454,30 @@ int main(int argc, char** argv){
 
     printf("=================================\n");
     struct automa_state automa[50];
-    generateAutomaChar(automa, grammar, productions_count);
+    totalStates = generateAutomaChar(automa, grammar, productions_count);
 
+
+    /////////////////////////////// STAMPA //////////////////////////////
+    for(int state=0; state<totalStates; state++){
+        printf("============== STATO %d ============\n", state);
+        for(int productionId = 0; productionId < automa[state].items_count; productionId++){
+            struct lr0_item* production = &automa[state].items[productionId];
+            printf("%c -> ", production->driver);
+            for (int t=0; t<strlen(production->body); t++){
+                if (t == production->marker_position){
+                    printf(".%c",production->body[t]);
+                }else{
+                    printf("%c",production->body[t]);
+                }
+            }
+            if (production->marker_position == strlen(production->body)){ // marker in ultima posizione
+                printf(".");
+            }
+            
+            printf("\n");
+        }
+        
+    }
+            
     return(0);
 }
