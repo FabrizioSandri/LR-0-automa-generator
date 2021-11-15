@@ -120,6 +120,32 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
     return false;
 }
 
+/**
+* cambia il fresh symbol della grammatica nel caso in cui vi fosse un conflitto 
+*/
+void updateFreshSymbol(struct lr0_item* grammar, int productions_count){
+    bool foundConflict = false;
+    char newFreshSymbol = 0;
+    char* freshSymbols = "KABCDEFGHIJLMNOPQRSTUVWXYZ"; // possibili fresh symbols
+
+    do {
+        foundConflict = false;
+
+        for(int i=0; i<productions_count; i++){
+            if (grammar[i].driver == freshSymbols[newFreshSymbol]){ // fresh symbol che non va bene, ne cerco un altro
+                foundConflict = true;
+                newFreshSymbol++;
+                break;
+            }
+        }
+
+    }while(foundConflict);
+
+    // aggiorna il driver dell'entry point con il fresh symbol
+    grammar[0].driver = freshSymbols[newFreshSymbol];
+    printf("Fresh Symbol: %c\n", grammar[0].driver);
+    
+}
 
 /**
 * conta il numero di produzioni targate come unmarked all'interno degli items dello stato state
@@ -428,7 +454,8 @@ int main(int argc, char** argv){
     }
     startSymbol = argv[1][0];
 
-    // estendi la grammatica P a P' : grammatica con aggiunta la produzione S -> startSymbol
+    // estendi la grammatica P a P' : grammatica con aggiunta la produzione K -> startSymbol. K deve essere un fresh symbol.
+    // Si controlla che K sia un fresh symbol utilizzando la funzione updateFreshSymbol dopo aver letto tutte le produzioni possibili.
     char fresh_production[] = "K -> _";
     fresh_production[5] = startSymbol;
     addProduction(grammar, fresh_production, &productions_count);
@@ -443,6 +470,8 @@ int main(int argc, char** argv){
         }
 
     }
+
+    updateFreshSymbol(grammar, productions_count);
 
     /////////////////////// STAMPA PRODUZIONI LETTE ///////////////////////
     printf("=================================  %d produzioni \n", productions_count);
