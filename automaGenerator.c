@@ -6,6 +6,7 @@
 #define MAX_PRODUCTION_BODY_LENGTH 30
 
 typedef enum { false, true } bool;
+typedef enum { normal, accept, final } state_type;
 
 struct lr0_item {
     char driver;
@@ -28,6 +29,8 @@ struct automa_state {
     struct transaction transactions[50];
     bool marked;
     
+    state_type type;
+
     int items_count;
     int kernel_items_count;
     int transaction_count;
@@ -120,6 +123,32 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
     return false;
 }
 
+/**
+* cambia il fresh symbol della grammatica nel caso in cui vi fosse un conflitto 
+*/
+void updateFreshSymbol(struct lr0_item* grammar, int productions_count){
+    bool foundConflict = false;
+    char newFreshSymbol = 0;
+    char* freshSymbols = "KABCDEFGHIJLMNOPQRSTUVWXYZ"; // possibili fresh symbols
+
+    do {
+        foundConflict = false;
+
+        for(int i=1; i<productions_count; i++){ //da 1 in quanto si evita di controllare la fresh production (la prima inserita nella grammatica)
+            if (grammar[i].driver == freshSymbols[newFreshSymbol]){ // fresh symbol che non va bene, ne cerco un altro
+                foundConflict = true;
+                newFreshSymbol++;
+                break;
+            }
+        }
+
+    }while(foundConflict);
+
+    // aggiorna il driver dell'entry point con il fresh symbol
+    grammar[0].driver = freshSymbols[newFreshSymbol];
+    printf("Il nuovo fresh Symbol e': %c\n", grammar[0].driver);
+    
+}
 
 /**
 * conta il numero di produzioni targate come unmarked all'interno degli items dello stato state
@@ -301,7 +330,7 @@ int getKernelEqualTo(struct automa_state* automa, int totalStates, int stateId, 
 * Generazione dell'automa caratteristico,
 * Ritorna: il numero di stati dell'automa caratteristico
 */
-int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, int productions_count){
+int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, int productions_count, char startSymbol){
     int totalStates = 0; 
 
     // le seguenti due variabili servono per tenere traccia del numero di nuovi stati aggiunti a partire da ogni stato :
@@ -315,7 +344,8 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
         .marked = false,
         .items_count = 0,
         .kernel_items_count = 1, // lo stato 0 contiene il kernel
-        .transaction_count = 0
+        .transaction_count = 0,
+        .type = normal
     };
 
     addProductionToClosure(&state0, grammar[0]); // aggiunta produzione inziiale al kernel dello stato iniziale
@@ -385,7 +415,8 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
                         .marked = false,
                         .items_count = 0,
                         .kernel_items_count = 0,
-                        .transaction_count = 0
+                        .transaction_count = 0,
+                        .type = normal
                     };
 
                     addProductionToKernel(&newState, production); // aggiunta del kernel al nuovo stato
@@ -394,8 +425,12 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
                 }
 
                 
-            }else{ // marker in ultima posizione
-                printf("reducing item\n");
+            }else{ // marker in ultima posizione : reducing item (mark dello stato come stato finale oppure accept)
+                if (production.body[marker_pos - 1] == startSymbol){
+                    automa[unmarkedState].type = accept;
+                }else{
+                    automa[unmarkedState].type = final;
+                }
             }
 
         }
@@ -428,7 +463,8 @@ int main(int argc, char** argv){
     }
     startSymbol = argv[1][0];
 
-    // estendi la grammatica P a P' : grammatica con aggiunta la produzione S -> startSymbol
+    // estendi la grammatica P a P' : grammatica con aggiunta la produzione K -> startSymbol. K deve essere un fresh symbol.
+    // Si controlla che K sia un fresh symbol utilizzando la funzione updateFreshSymbol dopo aver letto tutte le produzioni possibili.
     char fresh_production[] = "K -> _";
     fresh_production[5] = startSymbol;
     addProduction(grammar, fresh_production, &productions_count);
@@ -444,22 +480,32 @@ int main(int argc, char** argv){
 
     }
 
+    updateFreshSymbol(grammar, productions_count);
+
     /////////////////////// STAMPA PRODUZIONI LETTE ///////////////////////
-    printf("=================================  %d produzioni \n", productions_count);
+    printf("============== GRAMMATICA ===============\n");
     for (int i=0; i<productions_count; i++){
         printf("%c -> %s\n", grammar[i].driver, grammar[i].body);
     }
 
     ////////////////////////// CREAZIONE AUTOMA //////////////////////////
 
-    printf("=================================\n");
+    printf("============== TRANSIZIONI ==============\n");
     struct automa_state automa[50];
-    totalStates = generateAutomaChar(automa, grammar, productions_count);
+    totalStates = generateAutomaChar(automa, grammar, productions_count, startSymbol);
 
 
     /////////////////////////////// STAMPA //////////////////////////////
+    printf("=========== ITEMS NEGLI STATI ===========\n");
     for(int state=0; state<totalStates; state++){
-        printf("============== STATO %d ============\n", state);
+        char* state_type = "";
+        if (automa[state].type == accept){
+            state_type = "Stato di accept";
+        }else if(automa[state].type == final){
+            state_type = "Stato finale";
+        }
+
+        printf("++++++++++ STATO %d %s\n", state, state_type);
         for(int productionId = 0; productionId < automa[state].items_count; productionId++){
             struct lr0_item* production = &automa[state].items[productionId];
             printf("%c -> ", production->driver);
