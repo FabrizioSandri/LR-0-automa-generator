@@ -131,7 +131,7 @@ void updateFreshSymbol(struct lr0_item* grammar, int productions_count){
     do {
         foundConflict = false;
 
-        for(int i=0; i<productions_count; i++){
+        for(int i=1; i<productions_count; i++){ //da 1 in quanto si evita di controllare la fresh production (la prima inserita nella grammatica)
             if (grammar[i].driver == freshSymbols[newFreshSymbol]){ // fresh symbol che non va bene, ne cerco un altro
                 foundConflict = true;
                 newFreshSymbol++;
@@ -143,7 +143,7 @@ void updateFreshSymbol(struct lr0_item* grammar, int productions_count){
 
     // aggiorna il driver dell'entry point con il fresh symbol
     grammar[0].driver = freshSymbols[newFreshSymbol];
-    printf("Fresh Symbol: %c\n", grammar[0].driver);
+    printf("Il nuovo fresh Symbol e': %c\n", grammar[0].driver);
     
 }
 
