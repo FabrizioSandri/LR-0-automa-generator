@@ -3,14 +3,17 @@
 #include <string.h>
 
 #define MAX_GRAMMAR_PRODUCTIONS_NUMBER 20
-#define MAX_PRODUCTION_BODY_LENGTH 30
+#define PRODUCTION_BODY_LENGTH 30
+#define PRODUCTION_LENGTH 50
+#define FRESH_PRODUCTION_LENGTH 7
+#define MAX_AUTOMA_STATES_COUNT 30
 
 typedef enum { false, true } bool;
 typedef enum { normal, accept, final } state_type;
 
 struct lr0_item {
     char driver;
-    char body[MAX_PRODUCTION_BODY_LENGTH];
+    char body[PRODUCTION_BODY_LENGTH];
 
     int marker_position;
     bool marked;
@@ -80,7 +83,7 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
     removeSpaces(production);
 
     // ricerca di produzioni multi-defined (separate dalla | )
-    char newSeparatedProduction[MAX_PRODUCTION_BODY_LENGTH + 10] = "_ ->";
+    char newSeparatedProduction[FRESH_PRODUCTION_LENGTH] = "_ ->";
     char* separatorOccurence = strchr(production, '|');
 
     if(separatorOccurence){
@@ -335,7 +338,7 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
 
     // le seguenti due variabili servono per tenere traccia del numero di nuovi stati aggiunti a partire da ogni stato :
     // in particolare serviranno per evitare di creare un nuovo stato se esistesse gia
-    char alreadyAddedNextChar[MAX_PRODUCTION_BODY_LENGTH];
+    char alreadyAddedNextChar[MAX_AUTOMA_STATES_COUNT];
     int addedStates = 0;
 
     //////////////// INIZIALIZZAZIONE /////////////////
@@ -343,19 +346,19 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
     struct automa_state state0 = {
         .marked = false,
         .items_count = 0,
-        .kernel_items_count = 1, // lo stato 0 contiene il kernel
+        .kernel_items_count = 0,
         .transaction_count = 0,
         .type = normal
     };
 
-    addProductionToClosure(&state0, grammar[0]); // aggiunta produzione inziiale al kernel dello stato iniziale
-    automa[totalStates++] = state0;
-    automa[totalStates-1].items[0].isKernelProduction = true;  // il primo item fa parte del kernel
-
+    addProductionToKernel(&state0, grammar[0]); // aggiunta produzione inziiale al kernel dello stato iniziale
+    automa[totalStates] = state0;
+    automa[totalStates].items[0].marker_position = 0;  // reset del marker alla posizione 0 in quanto addProductionToKernel sposta il marker in avanti di 1
+    totalStates++;
     
     /////////////// SVOLGIMENTO //////////////////
-    int unmarkedState = getUnmarkedStateId(automa, totalStates);
-    while (unmarkedState != -1) {   // finche esiste uno stato unmarked
+    int unmarkedState;
+    while ( (unmarkedState = getUnmarkedStateId(automa, totalStates)) != -1) {   // finche esiste uno stato unmarked
          
         // closure del kernel dello stato unmarked (uno stato unmarked contiene solo il kernel)       
         computeClosure(&automa[unmarkedState], grammar, productions_count);
@@ -435,11 +438,7 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
 
         }
 
-
-
-        automa[unmarkedState].marked = true;
-        unmarkedState = getUnmarkedStateId(automa, totalStates);
-    
+        automa[unmarkedState].marked = true;    
         addedStates = 0;  // reset del numero di nonTerminali gia aggiunti
     }
 
@@ -453,7 +452,7 @@ int main(int argc, char** argv){
     struct lr0_item grammar[MAX_GRAMMAR_PRODUCTIONS_NUMBER];
     char startSymbol;
 
-    char production[MAX_PRODUCTION_BODY_LENGTH + 10];
+    char production[PRODUCTION_LENGTH];
     int productions_count = 0;
     int totalStates;
 
@@ -470,12 +469,12 @@ int main(int argc, char** argv){
     addProduction(grammar, fresh_production, &productions_count);
 
     // leggo le produzioni una ad una
-    while (fgets(production, MAX_PRODUCTION_BODY_LENGTH + 10, stdin) && production[0] != '\n'){
-        // rimuovo il carattere newline e gli spazi
+    while (fgets(production, PRODUCTION_LENGTH, stdin) && production[0] != '\n'){
+        // rimuovo il carattere newline
         production[strlen(production) - 1] = '\0';  
 
         if (addProduction(grammar, production, &productions_count) == false){ 
-            printf("La produzione non e' stata inserita in quanto non rispetta lo standard: A -> beta\n");
+            printf("La produzione %s non e' stata inserita in quanto non rispetta lo standard: A -> beta\n", production);
         }
 
     }
@@ -491,7 +490,7 @@ int main(int argc, char** argv){
     ////////////////////////// CREAZIONE AUTOMA //////////////////////////
 
     printf("============== TRANSIZIONI ==============\n");
-    struct automa_state automa[50];
+    struct automa_state automa[MAX_AUTOMA_STATES_COUNT];
     totalStates = generateAutomaChar(automa, grammar, productions_count, startSymbol);
 
 
