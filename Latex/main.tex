@@ -1,0 +1,44 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+
+\title{Generazione automa caratteristico parsing bottom-up LR(0) }
+\author{
+        Sandri Fabrizio \\ \\        
+        Dipartimento di Ingegneria e Scienza dell'Informazione\\
+        Università di Trento
+}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduzione}
+In questo report si vuole analizzare ed implementare la procedura di generazione di un automa caratteristico per il parsing bottom-up di tipo LR(0). Fra i vari tipi di parsing visti a lezione il parsing LR(0) è un tipo di parsing per cui si legge l'input da sinistra a destra e si produce una derivazione di tipo rightmost a partire dalla grammatica data in input.
+
+\paragraph{Il problema:} 
+il primo step del parsing bottom-up è quello di generare un automa caratteristico a partire dalla grammatica letta in input per poi andare a formare una tabella di parsing. In questo report ci focalizzeremo solamente sulla parte di generazione dell'automa caratteristico.
+
+\section{Definizioni}
+L'automa caratteristico è formato da un insieme di stati interconnessi da una funzione di transizione $\tau$ definita su coppie di stati. Ogni stato contiene degli LR(0)-items : alcuni di questi item faranno parte del kernel, mentre altri fanno parte della closure del kernel.\\
+
+La tecnica di costruzione dell'automa caratteristico è incrementale: andiamo a popolare un set di stati definendo mano a mano la funzione di transizione, fino a saturazione.
+
+
+\section{Input e Output}
+
+\subsection{Input}
+
+\subsection{Output}
+
+\section{Strutture dati}
+
+
+\section{Testing}
+
+
+
+
+
+\end{document}
