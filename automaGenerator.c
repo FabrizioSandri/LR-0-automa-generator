@@ -8,6 +8,8 @@
 #define FRESH_PRODUCTION_LENGTH 7
 #define MAX_AUTOMA_STATES_COUNT 30
 
+#define EPSILON '~'  // il carattere specificato e' un alias per il carattere '\epsilon'
+
 typedef enum { false, true } bool;
 typedef enum { normal, accept, final } state_type;
 
@@ -369,7 +371,7 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
             struct lr0_item production = automa[unmarkedState].items[i];
 
             int marker_pos = production.marker_position;
-            if (marker_pos < strlen(production.body)){ // se il marker non è in ultima posizione
+            if (marker_pos < strlen(production.body) && production.body[marker_pos] != EPSILON){ // se il marker non è in ultima posizione e non e' una transizione tramite epsilon
                 bool alreadyAddedState = false;
                 char nextChar = production.body[marker_pos];
 
@@ -508,13 +510,18 @@ int main(int argc, char** argv){
         for(int productionId = 0; productionId < automa[state].items_count; productionId++){
             struct lr0_item* production = &automa[state].items[productionId];
             printf("%c -> ", production->driver);
-            for (int t=0; t<strlen(production->body); t++){
-                if (t == production->marker_position){
-                    printf(".%c",production->body[t]);
-                }else{
-                    printf("%c",production->body[t]);
+            if (production->body[0] == EPSILON){
+                printf(".");
+            }else{
+                for (int t=0; t<strlen(production->body); t++){
+                    if (t == production->marker_position){
+                        printf(".%c",production->body[t]);
+                    }else{
+                        printf("%c",production->body[t]);
+                    }
                 }
             }
+            
             if (production->marker_position == strlen(production->body)){ // marker in ultima posizione
                 printf(".");
             }
