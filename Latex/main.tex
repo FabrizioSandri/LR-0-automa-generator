@@ -1,6 +1,7 @@
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
+\usepackage{amsfonts}
 
 \title{Generazione automa caratteristico parsing bottom-up LR(0) }
 \author{
@@ -21,7 +22,11 @@ In questo report si vuole analizzare ed implementare la procedura di generazione
 il primo step del parsing bottom-up è quello di generare un automa caratteristico a partire dalla grammatica letta in input per poi andare a formare una tabella di parsing. In questo report ci focalizzeremo solamente sulla parte di generazione dell'automa caratteristico.
 
 \section{Definizioni}
-L'automa caratteristico è formato da un insieme di stati interconnessi da una funzione di transizione $\tau$ definita su coppie di stati. Ogni stato contiene degli LR(0)-items : alcuni di questi item faranno parte del kernel, mentre altri fanno parte della closure del kernel.\\
+L'automa caratteristico è formato da un insieme di stati interconnessi da una funzione di transizione $\tau$ definita su coppie di stati. Se diciamo S gli stati dell'automa e V il vocabolario della grammatica considerata allora definiamo la funzione di transizione
+$$
+\tau \colon (S, V) \to S
+$$
+Ogni stato contiene degli LR(0)-items : alcuni di questi item faranno parte del kernel, mentre altri fanno parte della closure del kernel.\\
 
 La tecnica di costruzione dell'automa caratteristico è incrementale: andiamo a popolare un set di stati definendo mano a mano la funzione di transizione, fino a saturazione.
 
@@ -33,7 +38,6 @@ La tecnica di costruzione dell'automa caratteristico è incrementale: andiamo a 
 \subsection{Output}
 
 \section{Strutture dati}
-
 
 \section{Testing}
 
