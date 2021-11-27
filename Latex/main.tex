@@ -23,10 +23,7 @@ In questo report si vuole analizzare ed implementare la procedura di generazione
 il primo step del parsing bottom-up è quello di generare un automa caratteristico a partire dalla grammatica letta in input per poi andare a formare una tabella di parsing. In questo report ci focalizzeremo solamente sulla parte di generazione dell'automa caratteristico.
 
 \section{Definizioni}
-L'automa caratteristico è formato da un insieme di stati interconnessi da una funzione di transizione $\tau$ definita su coppie di stati. Se diciamo S gli stati dell'automa e V il vocabolario della grammatica considerata allora definiamo la funzione di transizione
-$$
-\tau \colon (S, V) \to S
-$$
+L'automa caratteristico è formato da un insieme di stati interconnessi da una funzione di transizione $\tau$ definita su coppie di stati. 
 Ogni stato contiene degli LR(0)-items : alcuni di questi item faranno parte del kernel, mentre altri fanno parte della closure del kernel.\\
 
 La tecnica di costruzione dell'automa caratteristico è incrementale: andiamo a popolare un set di stati definendo mano a mano la funzione di transizione, fino a saturazione.
@@ -40,8 +37,8 @@ Analizzeremo nei prossimi paragrafi le decisioni implementative prese per realiz
 \item Produzione
 \item Grammatica
 \item Item LR(0)
-\item Stato dell'automa caratteristico
 \item Funzione di transizione
+\item Stato dell'automa caratteristico
 \item Automa caratteristico
 \end{enumerate}
 
@@ -83,11 +80,29 @@ A livello implementativo un modo efficiente per implementare un Item LR(0) è qu
 Riportiamo ora il codice utilizzato per rappresentare questo tipo di item.
 \lstinputlisting[language=C,style=c]{c/fragments/lr0_item.c}
 
+\subsection{Funzione di transizione}
+La funzione di transizione associa ad una coppia (stato, letterale) un altro stato. Se diciamo S gli stati dell'automa caratteristico e V il vocabolario della grammatica considerata allora definiamo formalmente la funzione di transizione come
+$$
+\tau \colon (S, V) \to S
+$$
+
+Per poter implementare questa funzione nel modo più semplice ed efficiente possibile adottiamo una struttura avente 3 parametri:
+\begin{list}{-}{}
+\item int from : lo stato origine della transizione
+\item int to : lo stato destinazione della transizione
+\item char by : un letterale equivalente al valore che leggerò nell'input buffer. In altre parole questo sarà il letterale che etichetterà l'arco di transizione 
+\end{list}
+
+Riportiamo il codice della struttura associata alla funzione di transizione.
+\lstinputlisting[language=C,style=c]{c/fragments/transaction.c}
+
+
+
 \subsection{Stato dell'automa caratteristico}
 Ogni stato dell'automa caratteristico sarà definito da un identificativo numerico: la posizione nell'array $automa$ definito nella prossima sezione "Automa caratteristico". Descriveremo il singolo stato attraverso i seguenti attributi:
 \begin{list}{-}{}
 \item lr0\_item items[50] : dalla definizione sappiamo che ogni stato dell'automa caratteristico sarà composto da un insieme di LR(0) items, in questo caso definito tramite un array. Alcuni di questi items inoltre faranno parte del kernel dello stato.
-\item transaction transactions[AUTOMA\_STATES\_COUNT] : un insieme di transizioni uscenti dallo stato corrente e dirette nel verso degli altri stati. Anche in questo caso sfruttiamo la definizione di $struct transaction$ definita in precedenza.
+\item transaction transactions[MAX\_AUTOMA\_STATES\_COUNT] : un insieme di transizioni uscenti dallo stato corrente e dirette nel verso degli altri stati. Anche in questo caso sfruttiamo la definizione di $struct transaction$ definita in precedenza.
 \item state\_type type : indica il tipo di stato corrente che può essere uno stato fra i seguenti : $normale$, di $accept$ oppure $finale$.
 \item int items\_count : numero totale di items presenti nello stato(compresi quelli facenti parte del kernel)
 \item int kernel\_items\_count : numero di items che sono parte del kernel. Questa variabile è aggiunta al solo scopo di velocizzare la procedura di controllo della presenza di uno stato con lo stesso kernel nell'automa caratteristico. Se due stati hanno numero di items del kernel diverso, sicuramente non potranno essere uguali e quindi si saltano calcoli aggiuntivi.
@@ -97,6 +112,7 @@ Ogni stato dell'automa caratteristico sarà definito da un identificativo numeri
 L'implementazione dello stato dell'automa caratteristico rispecchia esattamente i punti appena visti.
 Riportiamo il codice utilizzato per rappresentare lo stato dell'automa.
 \lstinputlisting[language=C,style=c]{c/fragments/automa_state.c}
+
 
 
 \section{Input e Output}
