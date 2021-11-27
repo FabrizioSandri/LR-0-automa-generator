@@ -53,7 +53,7 @@ Analizzeremo nei prossimi paragrafi le decisioni implementative prese per realiz
 \end{enumerate}
 
 \subsection{Produzione}
-Tutto il codice si basa su questa struttura dati, la produzione. Ogni produzione è una struttura minimale composta da 3 parti:
+La produzione è una struttura dati di base su cui si basa la grammatica, essa è una struttura minimale composta da 3 parti:
 \begin{list}{-}{}
 \item char driver : il driver della produzione ;
 \item char[ ] body : stringa contenente il body della produzione ;
@@ -66,7 +66,7 @@ Riportiamo ora il codice utilizzato per rappresentare una produzione.
 \subsection{Grammatica}
 Il primo step nella procedura di generazione dell'automa caratteristico è quello di leggere la grammatica fornita in input dall'utente e memorizzarla. Vista la definizione di $production$ fornita in precedenza definiamo la grammatica come un array di produzioni.\\
 
-Ogni nuova produzione sarà inserita nella grammatica sfruttando la funzione $addProduction()$ \\
+Ogni nuova produzione sarà inserita nella grammatica sfruttando la funzione $addProduction()$ che si occuperà di rimuovere gli spazi e dividere le produzioni multi-definite, ovvero le produzioni con lo stesso driver ma con body differente unite dall'operatore $|$ e scritte sulla stessa riga . \\
 
 Riportiamo qui sotto il codice utilizzato per rappresentare la grammatica.
 \lstinputlisting[language=C,style=c]{c/fragments/grammar.c}
@@ -87,7 +87,7 @@ A livello implementativo un modo efficiente per implementare un Item LR(0) è qu
 \item bool isKernelProduction : settato a true per indicare che un Item fa parte del Kernel di uno stato.
 \end{list}
 
-Riportiamo ora il codice utilizzato per rappresentare questo tipo di item.
+Riportiamo ora il codice utilizzato per rappresentare gli Item LR(0).
 \lstinputlisting[language=C,style=c]{c/fragments/lr0_item.c}
 
 \subsection{Funzione di transizione}
@@ -96,7 +96,7 @@ $$
 \tau \colon (S, V) \to S
 $$
 
-Per poter implementare questa funzione nel modo più semplice ed efficiente possibile adottiamo una struttura avente 3 parametri:
+Per poter implementare questa funzione nel modo più semplice ed efficiente possibile adottiamo una struttura avente 3 attributi:
 \begin{list}{-}{}
 \item int from : lo stato origine della transizione
 \item int to : lo stato destinazione della transizione
