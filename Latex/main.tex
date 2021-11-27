@@ -35,7 +35,7 @@ La tecnica di costruzione dell'automa caratteristico è incrementale: andiamo a 
 \section{Strutture dati}
 Per implementare l'automa caratteristico dato in output dal programma e la grammatica fornita in input si è cercato di seguire uno stile di programmazione il più astratto e intuitivo possibile, in modo da rendere la lettura del codice di facile comprensione. In particolare il linguaggio C non offrendo delle strutture dati pre fabbricate ci ha obbligati a definirne alcune, sfruttando la keyword $struct$.\\
 
-Analizzeremo nelle seguenti sezioni le decisioni implementative prese per realizzare le varie parti necessarie alla costruzione di un automa caratteristico. Riportiamo in breve di quali importanti strutture dati ci avvaleremo durante la trattazione:
+Analizzeremo nei prossimi paragrafi le decisioni implementative prese per realizzare le varie parti necessarie alla costruzione di un automa caratteristico. Riportiamo in breve di quali importanti strutture dati ci avvaleremo durante la trattazione:
 \begin{enumerate}
 \item Produzione
 \item Grammatica
@@ -82,6 +82,21 @@ A livello implementativo un modo efficiente per implementare un Item LR(0) è qu
 
 Riportiamo ora il codice utilizzato per rappresentare questo tipo di item.
 \lstinputlisting[language=C,style=c]{c/fragments/lr0_item.c}
+
+\subsection{Stato dell'automa caratteristico}
+Ogni stato dell'automa caratteristico sarà definito da un identificativo numerico: la posizione nell'array $automa$ definito nella prossima sezione "Automa caratteristico". Descriveremo il singolo stato attraverso i seguenti attributi:
+\begin{list}{-}{}
+\item lr0\_item items[50] : dalla definizione sappiamo che ogni stato dell'automa caratteristico sarà composto da un insieme di LR(0) items, in questo caso definito tramite un array. Alcuni di questi items inoltre faranno parte del kernel dello stato.
+\item transaction transactions[AUTOMA\_STATES\_COUNT] : un insieme di transizioni uscenti dallo stato corrente e dirette nel verso degli altri stati. Anche in questo caso sfruttiamo la definizione di $struct transaction$ definita in precedenza.
+\item state\_type type : indica il tipo di stato corrente che può essere uno stato fra i seguenti : $normale$, di $accept$ oppure $finale$.
+\item int items\_count : numero totale di items presenti nello stato(compresi quelli facenti parte del kernel)
+\item int kernel\_items\_count : numero di items che sono parte del kernel. Questa variabile è aggiunta al solo scopo di velocizzare la procedura di controllo della presenza di uno stato con lo stesso kernel nell'automa caratteristico. Se due stati hanno numero di items del kernel diverso, sicuramente non potranno essere uguali e quindi si saltano calcoli aggiuntivi.
+\item int transaction\_count : numero di transizioni uscenti dallo stato
+\end{list}
+
+L'implementazione dello stato dell'automa caratteristico rispecchia esattamente i punti appena visti.
+Riportiamo il codice utilizzato per rappresentare lo stato dell'automa.
+\lstinputlisting[language=C,style=c]{c/fragments/automa_state.c}
 
 
 \section{Input e Output}
