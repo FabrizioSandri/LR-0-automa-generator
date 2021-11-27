@@ -1,7 +1,7 @@
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
-\usepackage{amsfonts}
+\usepackage{c/style} % include custom style for C
 
 \title{Generazione automa caratteristico parsing bottom-up LR(0) }
 \author{
@@ -11,6 +11,7 @@
 }
 
 \date{\today}
+
 
 \begin{document}
 \maketitle
@@ -36,12 +37,34 @@ Per implementare l'automa caratteristico dato in output dal programma e la gramm
 
 Analizzeremo nelle seguenti sezioni le decisioni implementative prese per realizzare le varie parti necessarie alla costruzione di un automa caratteristico. Riportiamo in breve di quali importanti strutture dati ci avvaleremo durante la trattazione:
 \begin{enumerate}
-\item Item LR(0)
+\item Produzione
 \item Grammatica
+\item Item LR(0)
 \item Stato dell'automa caratteristico
 \item Funzione di transizione
 \item Automa caratteristico
 \end{enumerate}
+
+\subsection{Produzione}
+Tutto il codice si basa su questa struttura dati, la produzione. Ogni produzione è una struttura minimale composta da 3 parti:
+\begin{list}{-}{}
+\item char driver : il driver della produzione ;
+\item char[ ] body : stringa contenente il body della produzione ;
+\item int production\_id : valore intero utilizzato per controllare in maniera efficiente se le produzioni memorizzate in due item distinti sono uguali. Se driver e body di due item distinti avranno lo stesso $production\_id$ vorrà dire che la produzione memorizzata nell'item sarà identica e meno della posizione del marker che può essere differente.
+\end{list}
+
+Riportiamo ora il codice utilizzato per rappresentare una produzione.
+\lstinputlisting[language=C,style=c]{c/fragments/production.c}
+
+\subsection{Grammatica}
+Il primo step nella procedura di generazione dell'automa caratteristico è quello di leggere la grammatica fornita in input dall'utente e memorizzarla. Vista la definizione di $production$ fornita in precedenza definiamo la grammatica come un array di produzioni.\\
+
+Ogni nuova produzione sarà inserita nella grammatica sfruttando la funzione $addProduction()$ \\
+
+Riportiamo qui sotto il codice utilizzato per rappresentare la grammatica.
+\lstinputlisting[language=C,style=c]{c/fragments/grammar.c}
+
+
 
 \subsection{Item LR(0)}
 Gli stati dell'automa caratteristico saranno formati da Item LR(0), ovvero Item associati ad una singola produzione e ad un marker
@@ -52,12 +75,14 @@ Dove il simbolo $\cdot$ indica la posizione del marker all'interno del body dell
 
 A livello implementativo un modo efficiente per implementare un Item LR(0) è quello di utilizzare una struct contenente le seguenti informazioni:
 \begin{list}{-}{}
-\item char driver : il driver della produzione associata all'item
-\item char[ ] body : il body della produzione associata all'item
-\item int marker\_position : un valore intero rappresentante la posizione del marker all'interno dell'item
-\item int production\_id : valore intero utilizzato per controllare in maniera efficiente se le produzioni memorizzate in due item distinti sono uguali. Se driver e body di due item distinti avranno lo stesso $production\_id$ vorrà dire che la produzione memorizzata nell'item sarà identica e meno della posizione del marker che può essere differente
-\item bool isKernelProduction : settato a true per indicare che un Item fa parte del Kernel di uno stato
+\item production prod : la produzione associata all'item e definita sfruttando la definizione di produzione vista in precedenza;
+\item int marker\_position : un valore intero rappresentante la posizione del marker all'interno dell'item;
+\item bool isKernelProduction : settato a true per indicare che un Item fa parte del Kernel di uno stato.
 \end{list}
+
+Riportiamo ora il codice utilizzato per rappresentare questo tipo di item.
+\lstinputlisting[language=C,style=c]{c/fragments/lr0_item.c}
+
 
 \section{Input e Output}
 
