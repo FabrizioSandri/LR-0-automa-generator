@@ -18,7 +18,6 @@ struct lr0_item {
     char body[PRODUCTION_BODY_LENGTH];
 
     int marker_position;
-    bool marked;
     int production_id; // utilizzato per controllare velocemente se una produzione e' uguale ad un altra senza controllare body e driver
     bool isKernelProduction;  // utilizzata per capire se un item fa parte del kernel
 };
@@ -114,7 +113,6 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
         strcpy(grammar[*productions_count].body, (production + bodyStartPosition));
 
         grammar[*productions_count].marker_position = 0; 
-        grammar[*productions_count].marked = false; 
         grammar[*productions_count].production_id = *productions_count; 
         grammar[*productions_count].isKernelProduction = false; 
         
@@ -155,20 +153,6 @@ void updateFreshSymbol(struct lr0_item* grammar, int productions_count){
     
 }
 
-/**
-* conta il numero di produzioni targate come unmarked all'interno degli items dello stato state
-*/
-int countUnmarked(struct automa_state* state){
-    int count = 0;
-
-    for (int i=0; i<state->items_count; i++){
-        if (state->items[i].marked == false){
-            count ++;
-        }
-    }
-
-    return count;
-}
 
 /**
 * ottiene l'id di uno stato unMarked all'interno dell'automa specificato
@@ -204,7 +188,6 @@ void addProductionToClosure(struct automa_state* destinationState, struct lr0_it
 
     if (alreadyIn == false){ // aggiungo solo se non e' gia presente
         destinationState->items[itemsInDestination] = item;
-        destinationState->items[itemsInDestination].marked = false;
         destinationState->items[itemsInDestination].marker_position = 0;
         destinationState->items[itemsInDestination].isKernelProduction = false;
 
@@ -229,7 +212,6 @@ void addProductionToKernel(struct automa_state* destinationState, struct lr0_ite
 
     if (alreadyIn == false){ // aggiungo solo se non e' gia presente
         destinationState->items[itemsInDestination] = item;
-        destinationState->items[itemsInDestination].marked = false;
         destinationState->items[itemsInDestination].marker_position = item.marker_position + 1;
         destinationState->items[itemsInDestination].isKernelProduction = true;
 
@@ -241,26 +223,19 @@ void addProductionToKernel(struct automa_state* destinationState, struct lr0_ite
 
 
 void computeClosure(struct automa_state* state, struct lr0_item* grammar, int productions_count){
-
-    while(countUnmarked(state) != 0){
-
-        for (int i=0; i<state->items_count; i++){
-            if (state->items[i].marked == false){
-                state->items[i].marked = true;
-
-                // se contine un marker prima di un non terminale si fa la closure
-                int dot = state->items[i].marker_position;
-                char nextToDot = state->items[i].body[dot];
-                if (isNonTerminal(nextToDot)){
-                    for(int t=0; t<productions_count; t++){
-                        if (grammar[t].driver == nextToDot){
-                            addProductionToClosure(state, grammar[t]);
-                        }
-                    }
+    int unmarkedItem = 0;
+    while( unmarkedItem < state->items_count ){
+        // se contine un marker prima di un non terminale si fa la closure
+        int dot = state->items[unmarkedItem].marker_position;
+        char nextToDot = state->items[unmarkedItem].body[dot];
+        if (isNonTerminal(nextToDot)){
+            for(int t=0; t<productions_count; t++){
+                if (grammar[t].driver == nextToDot){
+                    addProductionToClosure(state, grammar[t]);
                 }
-
             }
         }
+        unmarkedItem++;
     }
     
 }
