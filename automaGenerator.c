@@ -13,12 +13,16 @@
 typedef enum { false, true } bool;
 typedef enum { normal, accept, final } state_type;
 
-struct lr0_item {
+struct production {
     char driver;
     char body[PRODUCTION_BODY_LENGTH];
+    int production_id; // utilizzato per controllare velocemente se una produzione e' uguale ad un altra senza controllare body e driver
+};
+
+struct lr0_item {
+    struct production prod;
 
     int marker_position;
-    int production_id; // utilizzato per controllare velocemente se una produzione e' uguale ad un altra senza controllare body e driver
     bool isKernelProduction;  // utilizzata per capire se un item fa parte del kernel
 };
 
@@ -75,21 +79,21 @@ void removeSpaces(char* production){
 *  - true : produzione inserita con successo
 *  - false : errore, la produzione non e'stata inserita in quanto non rispetta lo standard A -> beta
 */
-bool addProduction(struct lr0_item* grammar, char* production, int* productions_count){
+bool addProduction(struct production* grammar, char* new_production, int* productions_count){
     // split della produzione in driver e body
     int bodyStartPosition;
     bool foundArrow = false;
     
     // rimozione degli spazi
-    removeSpaces(production);
+    removeSpaces(new_production);
 
     // ricerca di produzioni multi-defined (separate dalla | )
     char newSeparatedProduction[FRESH_PRODUCTION_LENGTH] = "_ ->";
-    char* separatorOccurence = strchr(production, '|');
+    char* separatorOccurence = strchr(new_production, '|');
 
     if(separatorOccurence){
         separatorOccurence[0] = '\0'; // sostituisci la | con il carattere di fine stringa nella produzione
-        newSeparatedProduction[0] = production[0]; // copia del driver
+        newSeparatedProduction[0] = new_production[0]; // copia del driver
 
         strcat(newSeparatedProduction, separatorOccurence + 1); // aggiunta del body
 
@@ -97,8 +101,8 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
     }
 
     // ricerca del sibolo arrow "->""
-    for (bodyStartPosition=1; bodyStartPosition<strlen(production); bodyStartPosition++){
-        if (production[bodyStartPosition-1] == '-' && production[bodyStartPosition] == '>' ){
+    for (bodyStartPosition=1; bodyStartPosition<strlen(new_production); bodyStartPosition++){
+        if (new_production[bodyStartPosition-1] == '-' && new_production[bodyStartPosition] == '>' ){
             bodyStartPosition++;
             foundArrow = true;
             break;
@@ -106,21 +110,16 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
     }
 
     // se e' una produzione valida
-    if (foundArrow && isNonTerminal(production[0])){
+    if (foundArrow && isNonTerminal(new_production[0])){
         
         // Aggiungi la produzione alla grammatica separando driver e body
-        grammar[*productions_count].driver = production[0];
-        strcpy(grammar[*productions_count].body, (production + bodyStartPosition));
-
-        grammar[*productions_count].marker_position = 0; 
+        grammar[*productions_count].driver = new_production[0];
+        strcpy(grammar[*productions_count].body, (new_production + bodyStartPosition));
         grammar[*productions_count].production_id = *productions_count; 
-        grammar[*productions_count].isKernelProduction = false; 
         
-
         (*productions_count)++;
 
         return true;
-
     }
 
     return false;
@@ -129,7 +128,7 @@ bool addProduction(struct lr0_item* grammar, char* production, int* productions_
 /**
 * cambia il fresh symbol della grammatica nel caso in cui vi fosse un conflitto 
 */
-void updateFreshSymbol(struct lr0_item* grammar, int productions_count){
+void updateFreshSymbol(struct production* grammar, int productions_count){
     bool foundConflict = false;
     char newFreshSymbol = 0;
     char* freshSymbols = "KABCDEFGHIJLMNOPQRSTUVWXYZ"; // possibili fresh symbols
@@ -173,21 +172,21 @@ int getUnmarkedStateId(struct automa_state* automa, int numberOfStates){
 /**
 * destination e' lo stato di destinazione delle closure da aggiungere
 */
-void addProductionToClosure(struct automa_state* destinationState, struct lr0_item item){
+void addItemToClosure(struct automa_state* destinationState, struct lr0_item* item){
     int itemsInDestination = destinationState->items_count;
 
     // controllo che l'item non sia gia presente nella closure. Un elemento e gia presente nella closure se ha lo stesso identificativo (stesso driver e stesso body)
     // e se la posizione del marker e' la stessa
     bool alreadyIn = false;
     for (int i=0; i<itemsInDestination; i++){
-        if (destinationState->items[i].production_id == item.production_id && destinationState->items[i].marker_position == item.marker_position ){
+        if (destinationState->items[i].prod.production_id == item->prod.production_id && destinationState->items[i].marker_position == item->marker_position ){
             alreadyIn = true;
             break;
         }
     }
 
     if (alreadyIn == false){ // aggiungo solo se non e' gia presente
-        destinationState->items[itemsInDestination] = item;
+        destinationState->items[itemsInDestination] = *item;
         destinationState->items[itemsInDestination].marker_position = 0;
         destinationState->items[itemsInDestination].isKernelProduction = false;
 
@@ -197,22 +196,22 @@ void addProductionToClosure(struct automa_state* destinationState, struct lr0_it
 }
 
 // funzione utilizzata per aggiungere una produzione al kernel di uno stato (inizializza il kernel a partire dallo stato precedente item)
-void addProductionToKernel(struct automa_state* destinationState, struct lr0_item item){
+void addItemToKernel(struct automa_state* destinationState, struct lr0_item* item){
     int itemsInDestination = destinationState->items_count;
 
     // controllo che l'item non sia gia presente nella closure. Un elemento e gia presente nella closure se ha lo stesso identificativo (stesso driver e stesso body)
     // e se la posizione del marker e' la stessa
     bool alreadyIn = false;
     for (int i=0; i<itemsInDestination; i++){
-        if (destinationState->items[i].production_id == item.production_id && destinationState->items[i].marker_position == item.marker_position ){
+        if (destinationState->items[i].prod.production_id == item->prod.production_id && destinationState->items[i].marker_position == item->marker_position ){
             alreadyIn = true;
             break;
         }
     }
 
     if (alreadyIn == false){ // aggiungo solo se non e' gia presente
-        destinationState->items[itemsInDestination] = item;
-        destinationState->items[itemsInDestination].marker_position = item.marker_position + 1;
+        destinationState->items[itemsInDestination] = *item;
+        destinationState->items[itemsInDestination].marker_position = item->marker_position + 1;
         destinationState->items[itemsInDestination].isKernelProduction = true;
 
         destinationState->items_count++;
@@ -222,16 +221,21 @@ void addProductionToKernel(struct automa_state* destinationState, struct lr0_ite
 }
 
 
-void computeClosure(struct automa_state* state, struct lr0_item* grammar, int productions_count){
+void computeClosure(struct automa_state* state, struct production* grammar, int productions_count){
     int unmarkedItem = 0;
     while( unmarkedItem < state->items_count ){
         // se contine un marker prima di un non terminale si fa la closure
         int dot = state->items[unmarkedItem].marker_position;
-        char nextToDot = state->items[unmarkedItem].body[dot];
+        char nextToDot = state->items[unmarkedItem].prod.body[dot];
         if (isNonTerminal(nextToDot)){
             for(int t=0; t<productions_count; t++){
                 if (grammar[t].driver == nextToDot){
-                    addProductionToClosure(state, grammar[t]);
+                    struct lr0_item newItem = {
+                        .prod = grammar[t],
+                        .marker_position = 0,
+                        .isKernelProduction = false
+                    };
+                    addItemToClosure(state, &newItem);
                 }
             }
         }
@@ -264,7 +268,7 @@ int getKernelEqualTo(struct automa_state* automa, int totalStates, int stateId, 
     // estrai le produzione che faranno parte del kernel del nuovo stato partendo da stateId
     for (int i=0; i<automa[stateId].items_count; i++){
         int marker_pos = automa[stateId].items[i].marker_position;
-        char productionNextChar = automa[stateId].items[i].body[marker_pos];
+        char productionNextChar = automa[stateId].items[i].prod.body[marker_pos];
         
         if (productionNextChar == nextChar){
             kernelOfState[stateIdKernelSize++] = automa[stateId].items[i];
@@ -280,7 +284,7 @@ int getKernelEqualTo(struct automa_state* automa, int totalStates, int stateId, 
             for (int kernelProd=0; kernelProd<stateIdKernelSize; kernelProd++){
                 bool corrispondenza = false;
                 for (int prod=0; prod<automa[t].items_count; prod++){
-                    if (automa[t].items[prod].production_id == kernelOfState[kernelProd].production_id && automa[t].items[prod].marker_position == kernelOfState[kernelProd].marker_position+1 && automa[t].items[prod].isKernelProduction){
+                    if (automa[t].items[prod].prod.production_id == kernelOfState[kernelProd].prod.production_id && automa[t].items[prod].marker_position == kernelOfState[kernelProd].marker_position+1 && automa[t].items[prod].isKernelProduction){
                         corrispondenza = true; // ho trovato una produzione dell'automa che matcha con quella del kernel  
                     }
                 }
@@ -310,7 +314,7 @@ int getKernelEqualTo(struct automa_state* automa, int totalStates, int stateId, 
 * Generazione dell'automa caratteristico,
 * Ritorna: il numero di stati dell'automa caratteristico
 */
-int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, int productions_count, char startSymbol){
+int generateAutomaChar(struct automa_state* automa, struct production* grammar, int productions_count, char startSymbol){
     int totalStates = 0; 
 
     // le seguenti due variabili servono per tenere traccia del numero di nuovi stati aggiunti a partire da ogni stato :
@@ -328,9 +332,17 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
         .type = normal
     };
 
-    addProductionToKernel(&state0, grammar[0]); // aggiunta produzione inziiale al kernel dello stato iniziale
+
+    // aggiunta dell'item del fresh symbol al kernel dello stato iniziale 0
+    struct lr0_item freshSymbolKernel = {
+        .prod = grammar[0],
+        .marker_position = 0,
+        .isKernelProduction = false
+    };
+
+    addItemToKernel(&state0, &freshSymbolKernel); 
     automa[totalStates] = state0;
-    automa[totalStates].items[0].marker_position = 0;  // reset del marker alla posizione 0 in quanto addProductionToKernel sposta il marker in avanti di 1
+    automa[totalStates].items[0].marker_position = 0;  // reset del marker alla posizione 0 in quanto addItemToKernel sposta il marker in avanti di 1
     totalStates++;
     
     /////////////// SVOLGIMENTO //////////////////
@@ -343,12 +355,12 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
         for (int i=0; i<automa[unmarkedState].items_count; i++){ // aggiunta delle transizioni a partire dagli stati unmarked
 
             // production e una produzione dello stato unmarked
-            struct lr0_item production = automa[unmarkedState].items[i];
+            struct lr0_item item = automa[unmarkedState].items[i];
 
-            int marker_pos = production.marker_position;
-            if (marker_pos < strlen(production.body) && production.body[marker_pos] != EPSILON){ // se il marker non è in ultima posizione e non e' una transizione tramite epsilon
+            int marker_pos = item.marker_position;
+            if (marker_pos < strlen(item.prod.body) && item.prod.body[marker_pos] != EPSILON){ // se il marker non è in ultima posizione e non e' una transizione tramite epsilon
                 bool alreadyAddedState = false;
-                char nextChar = production.body[marker_pos];
+                char nextChar = item.prod.body[marker_pos];
 
                 // duplicateStateOffset contiene l'offset dello stato uguale a partire dagli stati gia aggiunti per lo stato attuale preso in considerazione
                 int duplicateStateOffset;
@@ -366,7 +378,7 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
                 if (kernelEqualTo != -1){ // kernel gia presente, aggiungi solo la transizione verso lo stato specificato da kernelEqualTo
                     struct transaction newTransaction = {
                         .from = unmarkedState,
-                        .by = production.body[marker_pos],  // il prossimo simbolo
+                        .by = item.prod.body[marker_pos],  // il prossimo simbolo
                         .destination = kernelEqualTo
                     };
 
@@ -376,13 +388,13 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
 
                 } else if (alreadyAddedState){ // se lo stato destinazione esiste gia allora aggiungo semplicemente la produzione al kernel 
                     alreadyAddedStateId = totalStates - addedStates + duplicateStateOffset;  
-                    addProductionToKernel(&automa[alreadyAddedStateId], production); // aggiunta produzione al kernel dello stato gia essitente
+                    addItemToKernel(&automa[alreadyAddedStateId], &item); // aggiunta produzione al kernel dello stato gia essitente
                 }else{
-                    alreadyAddedNextChar[addedStates++] = production.body[marker_pos];
+                    alreadyAddedNextChar[addedStates++] = item.prod.body[marker_pos];
 
                     struct transaction newTransaction = {
                         .from = unmarkedState,
-                        .by = production.body[marker_pos],  // il prossimo simbolo
+                        .by = item.prod.body[marker_pos],  // il prossimo simbolo
                         .destination = totalStates
                     };
 
@@ -399,14 +411,14 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
                         .type = normal
                     };
 
-                    addProductionToKernel(&newState, production); // aggiunta del kernel al nuovo stato
+                    addItemToKernel(&newState, &item); // aggiunta del kernel al nuovo stato
                     automa[totalStates++] = newState;
 
                 }
 
                 
             }else{ // marker in ultima posizione : reducing item (mark dello stato come stato finale oppure accept)
-                if (production.body[marker_pos - 1] == startSymbol){
+                if (item.prod.body[marker_pos - 1] == startSymbol){
                     automa[unmarkedState].type = accept;
                 }else{
                     automa[unmarkedState].type = final;
@@ -426,10 +438,11 @@ int generateAutomaChar(struct automa_state* automa, struct lr0_item* grammar, in
 
 int main(int argc, char** argv){
     
-    struct lr0_item grammar[MAX_GRAMMAR_PRODUCTIONS_NUMBER];
+    struct production grammar[MAX_GRAMMAR_PRODUCTIONS_NUMBER];
+    
     char startSymbol;
 
-    char production[PRODUCTION_LENGTH];
+    char new_production[PRODUCTION_LENGTH];
     int productions_count = 0;
     int totalStates;
 
@@ -446,12 +459,12 @@ int main(int argc, char** argv){
     addProduction(grammar, fresh_production, &productions_count);
 
     // leggo le produzioni una ad una
-    while (fgets(production, PRODUCTION_LENGTH, stdin) && production[0] != '\n'){
+    while (fgets(new_production, PRODUCTION_LENGTH, stdin) && new_production[0] != '\n'){
         // rimuovo il carattere newline
-        production[strlen(production) - 1] = '\0';  
+        new_production[strlen(new_production) - 1] = '\0';  
 
-        if (addProduction(grammar, production, &productions_count) == false){ 
-            printf("La produzione %s non e' stata inserita in quanto non rispetta lo standard: A -> beta\n", production);
+        if (addProduction(grammar, new_production, &productions_count) == false){ 
+            printf("La produzione %s non e' stata inserita in quanto non rispetta lo standard: A -> beta\n", new_production);
         }
 
     }
@@ -482,22 +495,22 @@ int main(int argc, char** argv){
         }
 
         printf("++++++++++ STATO %d %s\n", state, state_type);
-        for(int productionId = 0; productionId < automa[state].items_count; productionId++){
-            struct lr0_item* production = &automa[state].items[productionId];
-            printf("%c -> ", production->driver);
-            if (production->body[0] == EPSILON){
+        for(int itemId = 0; itemId < automa[state].items_count; itemId++){
+            struct lr0_item* item = &automa[state].items[itemId];
+            printf("%c -> ", item->prod.driver);
+            if (item->prod.body[0] == EPSILON){
                 printf(".");
             }else{
-                for (int t=0; t<strlen(production->body); t++){
-                    if (t == production->marker_position){
-                        printf(".%c",production->body[t]);
+                for (int t=0; t<strlen(item->prod.body); t++){
+                    if (t == item->marker_position){
+                        printf(".%c",item->prod.body[t]);
                     }else{
-                        printf("%c",production->body[t]);
+                        printf("%c",item->prod.body[t]);
                     }
                 }
             }
             
-            if (production->marker_position == strlen(production->body)){ // marker in ultima posizione
+            if (item->marker_position == strlen(item->prod.body)){ // marker in ultima posizione
                 printf(".");
             }
             
