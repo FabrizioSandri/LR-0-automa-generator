@@ -1,0 +1,74 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{amsfonts}
+
+\title{Generazione automa caratteristico parsing bottom-up LR(0) }
+\author{
+        Sandri Fabrizio \\ \\        
+        Dipartimento di Ingegneria e Scienza dell'Informazione\\
+        Università di Trento
+}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduzione}
+In questo report si vuole analizzare ed implementare la procedura di generazione di un automa caratteristico per il parsing bottom-up di tipo LR(0). Fra i vari tipi di parsing visti a lezione il parsing LR(0) è un tipo di parsing per cui si legge l'input da sinistra a destra e si produce una derivazione di tipo rightmost a partire dalla grammatica data in input.
+
+\paragraph{Il problema:} 
+il primo step del parsing bottom-up è quello di generare un automa caratteristico a partire dalla grammatica letta in input per poi andare a formare una tabella di parsing. In questo report ci focalizzeremo solamente sulla parte di generazione dell'automa caratteristico.
+
+\section{Definizioni}
+L'automa caratteristico è formato da un insieme di stati interconnessi da una funzione di transizione $\tau$ definita su coppie di stati. Se diciamo S gli stati dell'automa e V il vocabolario della grammatica considerata allora definiamo la funzione di transizione
+$$
+\tau \colon (S, V) \to S
+$$
+Ogni stato contiene degli LR(0)-items : alcuni di questi item faranno parte del kernel, mentre altri fanno parte della closure del kernel.\\
+
+La tecnica di costruzione dell'automa caratteristico è incrementale: andiamo a popolare un set di stati definendo mano a mano la funzione di transizione, fino a saturazione.
+
+
+\section{Strutture dati}
+Per implementare l'automa caratteristico dato in output dal programma e la grammatica fornita in input si è cercato di seguire uno stile di programmazione il più astratto e intuitivo possibile, in modo da rendere la lettura del codice di facile comprensione. In particolare il linguaggio C non offrendo delle strutture dati pre fabbricate ci ha obbligati a definirne alcune, sfruttando la keyword $struct$.\\
+
+Analizzeremo nelle seguenti sezioni le decisioni implementative prese per realizzare le varie parti necessarie alla costruzione di un automa caratteristico. Riportiamo in breve di quali importanti strutture dati ci avvaleremo durante la trattazione:
+\begin{enumerate}
+\item Item LR(0)
+\item Grammatica
+\item Stato dell'automa caratteristico
+\item Funzione di transizione
+\item Automa caratteristico
+\end{enumerate}
+
+\subsection{Item LR(0)}
+Gli stati dell'automa caratteristico saranno formati da Item LR(0), ovvero Item associati ad una singola produzione e ad un marker
+$$
+A \to \alpha\cdot\beta
+$$ 
+Dove il simbolo $\cdot$ indica la posizione del marker all'interno del body della produzione. \\
+
+A livello implementativo un modo efficiente per implementare un Item LR(0) è quello di utilizzare una struct contenente le seguenti informazioni:
+\begin{list}{-}{}
+\item char driver : il driver della produzione associata all'item
+\item char[ ] body : il body della produzione associata all'item
+\item int marker\_position : un valore intero rappresentante la posizione del marker all'interno dell'item
+\item int production\_id : valore intero utilizzato per controllare in maniera efficiente se le produzioni memorizzate in due item distinti sono uguali. Se driver e body di due item distinti avranno lo stesso $production\_id$ vorrà dire che la produzione memorizzata nell'item sarà identica e meno della posizione del marker che può essere differente
+\item bool isKernelProduction : settato a true per indicare che un Item fa parte del Kernel di uno stato
+\end{list}
+
+\section{Input e Output}
+
+\subsection{Input}
+
+\subsection{Output}
+
+\section{Testing}
+
+
+
+
+
+\end{document}
