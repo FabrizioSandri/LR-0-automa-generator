@@ -1,7 +1,7 @@
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
-\usepackage{amsfonts}
+\usepackage{c/style} % include custom style for C
 
 \title{Generazione automa caratteristico parsing bottom-up LR(0) }
 \author{
@@ -11,6 +11,7 @@
 }
 
 \date{\today}
+
 
 \begin{document}
 \maketitle
@@ -58,6 +59,9 @@ A livello implementativo un modo efficiente per implementare un Item LR(0) è qu
 \item int production\_id : valore intero utilizzato per controllare in maniera efficiente se le produzioni memorizzate in due item distinti sono uguali. Se driver e body di due item distinti avranno lo stesso $production\_id$ vorrà dire che la produzione memorizzata nell'item sarà identica e meno della posizione del marker che può essere differente
 \item bool isKernelProduction : settato a true per indicare che un Item fa parte del Kernel di uno stato
 \end{list}
+
+Riportiamo ora il codice utilizzato per rappresentare questo tipo di item.
+\lstinputlisting[language=C,style=c]{c/fragments/lr0_item.c}
 
 \section{Input e Output}
 
