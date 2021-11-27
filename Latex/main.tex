@@ -26,7 +26,17 @@ il primo step del parsing bottom-up è quello di generare un automa caratteristi
 L'automa caratteristico è formato da un insieme di stati interconnessi da una funzione di transizione $\tau$ definita su coppie di stati. 
 Ogni stato contiene degli LR(0)-items : alcuni di questi item faranno parte del kernel, mentre altri fanno parte della closure del kernel.\\
 
-La tecnica di costruzione dell'automa caratteristico è incrementale: andiamo a popolare un set di stati definendo mano a mano la funzione di transizione, fino a saturazione.
+La tecnica di costruzione dell'automa caratteristico è incrementale: andiamo a popolare un set di stati definendo mano a mano la funzione di transizione, fino a saturazione. Nel dettaglio l'algoritmo di generazione dell'automa seguirà i seguenti step:
+\begin{description}
+\item[-] Lettura della grammatica fornita in input dall'utente ed estrazione delle produzioni con rimozione di eventuali spazi dalla produzione;
+\item[-] Aggiunta di una fresh production alla grammatica facendo attenzione ad aggiungere un simbolo nuovo in modo da evitare conflitti;
+\item[-] Creazione e aggiunta dello stato iniziale all'automa caratteristico (stato 0), costituito da un singolo Item LR(0), quello della fresh production;
+\item[-] Calcolo della closure dell'Item contenuto nello stato iniziale con aggiunta delle nuove transizioni verso nuovi stati. In questo step bisognerà fare attenzione a non aggiungere un nuovo stato se il kernel è identico a quello di uno stato già aggiunto in precedenza: bisognerà quindi ricercare nell'automa se esiste uno stato con lo stesso kernel;
+\item[-] Per ogni nuovo stato creato si calcola il kernel e lo si aggiunge agli items dello stato stesso;
+\item[-] A partire dal kernel del nuovo stato si calcola la closure e si aggiungono le nuove transizioni verso i nuovi stati;
+\item[-] Si eseguono gli ultimi due punti fino a saturazione, ovvero finché ci sono nuovi stati, ovvero stati non marcati nell'automa caratteristico;
+\item[-] Giunti al termine si stampano a video le transizioni e tutte le informazioni sui singoli stati dell'automa.
+\end{description}
 
 
 \section{Strutture dati}
