@@ -23,30 +23,37 @@ In questo report si vuole analizzare ed implementare la procedura di generazione
 il primo step del parsing bottom-up è quello di generare un automa caratteristico a partire dalla grammatica letta in input per poi andare a formare una tabella di parsing. In questo report ci focalizzeremo solamente sulla parte di generazione dell'automa caratteristico.
 
 \section{Definizioni}
-L'automa caratteristico è formato da un insieme di stati interconnessi da una funzione di transizione $\tau$ definita su coppie di stati. Se diciamo S gli stati dell'automa e V il vocabolario della grammatica considerata allora definiamo la funzione di transizione
-$$
-\tau \colon (S, V) \to S
-$$
+L'automa caratteristico è formato da un insieme di stati interconnessi da una funzione di transizione $\tau$ definita su coppie di stati. 
 Ogni stato contiene degli LR(0)-items : alcuni di questi item faranno parte del kernel, mentre altri fanno parte della closure del kernel.\\
 
-La tecnica di costruzione dell'automa caratteristico è incrementale: andiamo a popolare un set di stati definendo mano a mano la funzione di transizione, fino a saturazione.
+La tecnica di costruzione dell'automa caratteristico è incrementale: andiamo a popolare un set di stati definendo mano a mano la funzione di transizione, fino a saturazione. Nel dettaglio l'algoritmo di generazione dell'automa seguirà i seguenti step:
+\begin{description}
+\item[-] Lettura della grammatica fornita in input dall'utente ed estrazione delle produzioni con rimozione di eventuali spazi dalla produzione;
+\item[-] Aggiunta di una fresh production alla grammatica facendo attenzione ad aggiungere un simbolo nuovo in modo da evitare conflitti;
+\item[-] Creazione e aggiunta dello stato iniziale all'automa caratteristico (stato 0), costituito da un singolo Item LR(0), quello della fresh production;
+\item[-] Calcolo della closure dell'Item contenuto nello stato iniziale con aggiunta delle nuove transizioni verso nuovi stati. In questo step bisognerà fare attenzione a non aggiungere un nuovo stato se il kernel è identico a quello di uno stato già aggiunto in precedenza: bisognerà quindi ricercare nell'automa se esiste uno stato con lo stesso kernel;
+\item[-] Per ogni nuovo stato creato si calcola il kernel e lo si aggiunge agli items dello stato stesso;
+\item[-] A partire dal kernel del nuovo stato si calcola la closure e si aggiungono le nuove transizioni verso i nuovi stati;
+\item[-] Si eseguono gli ultimi due punti fino a saturazione, ovvero finché ci sono nuovi stati, ovvero stati non marcati nell'automa caratteristico;
+\item[-] Giunti al termine si stampano a video le transizioni e tutte le informazioni sui singoli stati dell'automa.
+\end{description}
 
 
 \section{Strutture dati}
 Per implementare l'automa caratteristico dato in output dal programma e la grammatica fornita in input si è cercato di seguire uno stile di programmazione il più astratto e intuitivo possibile, in modo da rendere la lettura del codice di facile comprensione. In particolare il linguaggio C non offrendo delle strutture dati pre fabbricate ci ha obbligati a definirne alcune, sfruttando la keyword $struct$.\\
 
-Analizzeremo nelle seguenti sezioni le decisioni implementative prese per realizzare le varie parti necessarie alla costruzione di un automa caratteristico. Riportiamo in breve di quali importanti strutture dati ci avvaleremo durante la trattazione:
+Analizzeremo nei prossimi paragrafi le decisioni implementative prese per realizzare le varie parti necessarie alla costruzione di un automa caratteristico. Riportiamo in breve di quali importanti strutture dati ci avvaleremo durante la trattazione:
 \begin{enumerate}
 \item Produzione
 \item Grammatica
 \item Item LR(0)
-\item Stato dell'automa caratteristico
 \item Funzione di transizione
+\item Stato dell'automa caratteristico
 \item Automa caratteristico
 \end{enumerate}
 
 \subsection{Produzione}
-Tutto il codice si basa su questa struttura dati, la produzione. Ogni produzione è una struttura minimale composta da 3 parti:
+La produzione è una struttura dati di base su cui si basa la grammatica, essa è una struttura minimale composta da 3 parti:
 \begin{list}{-}{}
 \item char driver : il driver della produzione ;
 \item char[ ] body : stringa contenente il body della produzione ;
@@ -59,7 +66,7 @@ Riportiamo ora il codice utilizzato per rappresentare una produzione.
 \subsection{Grammatica}
 Il primo step nella procedura di generazione dell'automa caratteristico è quello di leggere la grammatica fornita in input dall'utente e memorizzarla. Vista la definizione di $production$ fornita in precedenza definiamo la grammatica come un array di produzioni.\\
 
-Ogni nuova produzione sarà inserita nella grammatica sfruttando la funzione $addProduction()$ \\
+Ogni nuova produzione sarà inserita nella grammatica sfruttando la funzione $addProduction()$ che si occuperà di rimuovere gli spazi e dividere le produzioni multi-definite, ovvero le produzioni con lo stesso driver ma con body differente unite dall'operatore $|$ e scritte sulla stessa riga . \\
 
 Riportiamo qui sotto il codice utilizzato per rappresentare la grammatica.
 \lstinputlisting[language=C,style=c]{c/fragments/grammar.c}
@@ -80,9 +87,47 @@ A livello implementativo un modo efficiente per implementare un Item LR(0) è qu
 \item bool isKernelProduction : settato a true per indicare che un Item fa parte del Kernel di uno stato.
 \end{list}
 
-Riportiamo ora il codice utilizzato per rappresentare questo tipo di item.
+Riportiamo ora il codice utilizzato per rappresentare gli Item LR(0).
 \lstinputlisting[language=C,style=c]{c/fragments/lr0_item.c}
 
+\subsection{Funzione di transizione}
+La funzione di transizione associa ad una coppia (stato, letterale) un altro stato. Se diciamo S gli stati dell'automa caratteristico e V il vocabolario della grammatica considerata allora definiamo formalmente la funzione di transizione come
+$$
+\tau \colon (S, V) \to S
+$$
+
+Per poter implementare questa funzione nel modo più semplice ed efficiente possibile adottiamo una struttura avente 3 attributi:
+\begin{list}{-}{}
+\item int from : lo stato origine della transizione
+\item int to : lo stato destinazione della transizione
+\item char by : un letterale equivalente al valore che leggerò nell'input buffer. In altre parole questo sarà il letterale che etichetterà l'arco di transizione 
+\end{list}
+
+Riportiamo il codice della struttura associata alla funzione di transizione.
+\lstinputlisting[language=C,style=c]{c/fragments/transition.c}
+
+
+
+\subsection{Stato dell'automa caratteristico}
+Ogni stato dell'automa caratteristico sarà definito da un identificativo numerico: la posizione nell'array $automa$ definito nella prossima sezione "Automa caratteristico". Descriveremo il singolo stato attraverso i seguenti attributi:
+\begin{list}{-}{}
+\item lr0\_item items[50] : dalla definizione sappiamo che ogni stato dell'automa caratteristico sarà composto da un insieme di LR(0) items, in questo caso definito tramite un array. Alcuni di questi items inoltre faranno parte del kernel dello stato.
+\item transaction transactions[MAX\_AUTOMA\_STATES\_COUNT] : un insieme di transizioni uscenti dallo stato corrente e dirette nel verso degli altri stati. Anche in questo caso sfruttiamo la definizione di $struct transaction$ definita in precedenza.
+\item state\_type type : indica il tipo di stato corrente che può essere uno stato fra i seguenti : $normale$, di $accept$ oppure $finale$.
+\item int items\_count : numero totale di items presenti nello stato(compresi quelli facenti parte del kernel)
+\item int kernel\_items\_count : numero di items che sono parte del kernel. Questa variabile è aggiunta al solo scopo di velocizzare la procedura di controllo della presenza di uno stato con lo stesso kernel nell'automa caratteristico. Se due stati hanno numero di items del kernel diverso, sicuramente non potranno essere uguali e quindi si saltano calcoli aggiuntivi.
+\item int transaction\_count : numero di transizioni uscenti dallo stato
+\end{list}
+
+L'implementazione dello stato dell'automa caratteristico rispecchia esattamente i punti appena visti.
+Riportiamo il codice utilizzato per rappresentare lo stato dell'automa.
+\lstinputlisting[language=C,style=c]{c/fragments/automa_state.c}
+
+\subsection{Automa caratteristico}
+Siamo giunti all'ultima struttura : l'automa caratteristico per il parsing bottom-up LR(0). Abbiamo tutte le strutture necessarie per definirlo. Rappresenteremo l'automa attraverso un insieme di stati definiti come nel precedente paragrafo.\\
+
+Riportiamo per completezza il codice per definire l'automa
+\lstinputlisting[language=C,style=c]{c/fragments/automa.c}
 
 \section{Input e Output}
 
