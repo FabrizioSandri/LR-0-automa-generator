@@ -26,7 +26,7 @@ struct lr0_item {
     bool isKernelProduction;  // utilizzata per capire se un item fa parte del kernel
 };
 
-struct transaction {
+struct transition {
     int from;
     char by;
     int destination;
@@ -34,13 +34,13 @@ struct transaction {
 
 struct automa_state {
     struct lr0_item items[50];  
-    struct transaction transactions[MAX_AUTOMA_STATES_COUNT];
+    struct transition transitions[MAX_AUTOMA_STATES_COUNT];
     
     state_type type;
 
     int items_count;
     int kernel_items_count;
-    int transaction_count;
+    int transition_count;
 };
 
 bool isNonTerminal(char val){
@@ -309,7 +309,7 @@ int generateAutomaChar(struct automa_state* automa, struct production* grammar, 
     struct automa_state state0 = {
         .items_count = 0,
         .kernel_items_count = 0,
-        .transaction_count = 0,
+        .transition_count = 0,
         .type = normal
     };
 
@@ -357,15 +357,15 @@ int generateAutomaChar(struct automa_state* automa, struct production* grammar, 
 
                 int kernelEqualTo = getKernelEqualTo(automa, totalStates, unmarkedStateId, nextChar);
                 if (kernelEqualTo != -1){ // kernel gia presente, aggiungi solo la transizione verso lo stato specificato da kernelEqualTo
-                    struct transaction newTransaction = {
+                    struct transition newTransition = {
                         .from = unmarkedStateId,
                         .by = item.prod.body[marker_pos],  // il prossimo simbolo
                         .destination = kernelEqualTo
                     };
 
                     
-                    printf("Tau (%d, %c) = %d \n", newTransaction.from, newTransaction.by, newTransaction.destination);
-                    automa[unmarkedStateId].transactions[automa[unmarkedStateId].transaction_count++] = newTransaction;
+                    printf("Tau (%d, %c) = %d \n", newTransition.from, newTransition.by, newTransition.destination);
+                    automa[unmarkedStateId].transitions[automa[unmarkedStateId].transition_count++] = newTransition;
 
                 } else if (alreadyAddedState){ // se lo stato destinazione esiste gia allora aggiungo semplicemente la produzione al kernel 
                     alreadyAddedStateId = totalStates - addedStates + duplicateStateOffset;  
@@ -373,21 +373,21 @@ int generateAutomaChar(struct automa_state* automa, struct production* grammar, 
                 }else{
                     alreadyAddedNextChar[addedStates++] = item.prod.body[marker_pos];
 
-                    struct transaction newTransaction = {
+                    struct transition newTransition = {
                         .from = unmarkedStateId,
                         .by = item.prod.body[marker_pos],  // il prossimo simbolo
                         .destination = totalStates
                     };
 
                     
-                    printf("Tau (%d, %c) = %d \n", newTransaction.from, newTransaction.by, newTransaction.destination);
-                    automa[unmarkedStateId].transactions[automa[unmarkedStateId].transaction_count++] = newTransaction;
+                    printf("Tau (%d, %c) = %d \n", newTransition.from, newTransition.by, newTransition.destination);
+                    automa[unmarkedStateId].transitions[automa[unmarkedStateId].transition_count++] = newTransition;
 
                     // trovato nuovo stato, lo inizializziamo
                     struct automa_state newState = {
                         .items_count = 0,
                         .kernel_items_count = 0,
-                        .transaction_count = 0,
+                        .transition_count = 0,
                         .type = normal
                     };
 
