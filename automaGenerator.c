@@ -2,11 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_GRAMMAR_PRODUCTIONS_NUMBER 20
-#define PRODUCTION_BODY_LENGTH 30
+#define MAX_GRAMMAR_PRODUCTIONS_NUMBER 50
+#define PRODUCTION_BODY_LENGTH 50
 #define PRODUCTION_LENGTH 50
-#define FRESH_PRODUCTION_LENGTH 7
-#define MAX_AUTOMA_STATES_COUNT 30
+#define MAX_AUTOMA_STATES_COUNT 100
 
 #define EPSILON '~'  // il carattere specificato e' un alias per il carattere '\epsilon'
 
@@ -87,11 +86,11 @@ bool addProduction(struct production* grammar, char* new_production, int* produc
     removeSpaces(new_production);
 
     // ricerca di produzioni multi-defined (separate dalla | )
-    char newSeparatedProduction[FRESH_PRODUCTION_LENGTH] = "_ ->";
+    char newSeparatedProduction[PRODUCTION_LENGTH] = "_ ->";
     char* separatorOccurence = strchr(new_production, '|');
 
     if(separatorOccurence){
-        separatorOccurence[0] = '\0'; // sostituisci la | con il carattere di fine stringa nella produzione
+        separatorOccurence[0] = '\0'; // sostituisci la | con il carattere di fine stringa nella produzione originale
         newSeparatedProduction[0] = new_production[0]; // copia del driver
 
         strcat(newSeparatedProduction, separatorOccurence + 1); // aggiunta del body
