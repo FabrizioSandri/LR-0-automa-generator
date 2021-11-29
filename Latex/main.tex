@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
 \usepackage{c/style} % include custom style for C
+\usepackage{amsmath}
 
 \title{Generazione automa caratteristico parsing bottom-up LR(0) }
 \author{
@@ -132,6 +133,31 @@ Riportiamo per completezza il codice per definire l'automa
 \section{Input e Output}
 
 \subsection{Input}
+La procedura di generazione dell'automa caratteristico assume che sia fornita una grammatica in input seguendo una particolari sintassi. Esistono due modi per fornire la grammatica:
+\begin{enumerate}
+\item Input da parte dell'utente
+\item Input da file
+\end{enumerate}
+
+
+\subsubsection{Input da parte dell'utente}
+L'utente eseguirà il programma e dopo aver passato lo start symbol della grammatica come parametro dovrà inserire manualmente ogni singola produzione separata da un carattere "a capo". Per terminare l'inserimento si dovrà semplicemente cliccare il tasto "Enter" dopo aver inserito l'ultima produzione. Ogni produzione dovrà rispettare lo standard specificato della sezione "Formato input".\\
+
+\paragraph{Esempio}
+Supponiamo di avere in input la seguente grammatica avente come start symbol $S$ e di voler generare l'automa caratteristico associato.
+\begin{align*}
+    S \to aABe \\
+	A \to Abc \mid b \\
+	B \to d 
+\end{align*}
+
+L'utente eseguirà il programma compilato passando lo start symbol S e le produzioni una per volta come nel seguente frammento estratto dalla shell
+\lstinputlisting[language=C,style=c]{bash_fragments/user_input.bash}
+
+
+\subsubsection{Input da file}
+
+\subsubsection{Formato input}
 
 \subsection{Output}
 
