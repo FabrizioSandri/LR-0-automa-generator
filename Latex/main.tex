@@ -142,7 +142,16 @@ La procedura di generazione dell'automa caratteristico assume che sia fornita un
 Entrambi questi metodi assumono che l'input sia fornito in un formato standard come specificato nel prossimo paragrafo.
 
 \subsubsection{Formato input}\label{inputformat}
+La grammatica fornita dall'utente dovrà rispettare le seguenti regole sintattiche:
+\begin{enumerate}
+\item Ogni produzione dovrà essere della forma \texttt{A -> $\alpha$} dove A è un non terminale e $\alpha$ è un insieme di simboli terminali e non terminali. 
+\item driver e body delle produzioni dovranno essere separati da due caratteri "trattino" e "maggiore" formando il simbolo \texttt{->} 
+\item ogni letterale della grammatica, terminale o non terminale che sia, sarà rappresentato da un singolo carattere. Ad esempio se si volesse rappresentare il terminale $digit$ saremo costretti a utilizzare un solo carattere $d$. La sequenza $digit$ altrimenti verrebbe interpretata come 5 terminali
+\item non facendo parte dello standard ascii supportato dal linguaggio C, il carattere $\epsilon$ verrà rappresentato dal carattere $\sim$.
+La produzione $A \to \epsilon$ verrà quindi rappresentata come \texttt{A -> $\sim$}
+\item ogni spazio inserito nelle produzioni verrà rimosso in modo da evitare che il carattere di spaziatura sia considerato un terminale.
 
+\end{enumerate} 
 
 \subsubsection{Input da parte dell'utente}
 L'utente eseguirà il programma e dopo aver passato lo start symbol della grammatica come parametro dovrà inserire manualmente ogni singola produzione separata da un carattere "a capo". Per terminare l'inserimento si dovrà semplicemente cliccare il tasto "Enter" dopo aver inserito l'ultima produzione. Ogni produzione dovrà rispettare lo standard specificato della sezione \ref{inputformat}.\\
