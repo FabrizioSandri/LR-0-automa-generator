@@ -2,11 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_GRAMMAR_PRODUCTIONS_NUMBER 20
-#define PRODUCTION_BODY_LENGTH 30
+#define MAX_GRAMMAR_PRODUCTIONS_NUMBER 50
+#define PRODUCTION_BODY_LENGTH 50
 #define PRODUCTION_LENGTH 50
-#define FRESH_PRODUCTION_LENGTH 7
-#define MAX_AUTOMA_STATES_COUNT 30
+#define MAX_AUTOMA_STATES_COUNT 100
 
 #define EPSILON '~'  // il carattere specificato e' un alias per il carattere '\epsilon'
 
@@ -87,11 +86,11 @@ bool addProduction(struct production* grammar, char* new_production, int* produc
     removeSpaces(new_production);
 
     // ricerca di produzioni multi-defined (separate dalla | )
-    char newSeparatedProduction[FRESH_PRODUCTION_LENGTH] = "_ ->";
+    char newSeparatedProduction[PRODUCTION_LENGTH] = "_ ->";
     char* separatorOccurence = strchr(new_production, '|');
 
     if(separatorOccurence){
-        separatorOccurence[0] = '\0'; // sostituisci la | con il carattere di fine stringa nella produzione
+        separatorOccurence[0] = '\0'; // sostituisci la | con il carattere di fine stringa nella produzione originale
         newSeparatedProduction[0] = new_production[0]; // copia del driver
 
         strcat(newSeparatedProduction, separatorOccurence + 1); // aggiunta del body
@@ -417,7 +416,7 @@ int generateAutomaChar(struct automa_state* automa, struct production* grammar, 
 
 
 int main(int argc, char** argv){
-    
+    FILE* inputSource = stdin;
     struct production grammar[MAX_GRAMMAR_PRODUCTIONS_NUMBER];
     
     char startSymbol;
@@ -426,11 +425,15 @@ int main(int argc, char** argv){
     int productions_count = 0;
     int totalStates;
 
-    if (argc != 2) {
-        printf("Use %s <start_symbol>\n", argv[0]);
+    if (argc < 2) {
+        printf("Use %s <start_symbol> <grammar_file>\n", argv[0]);
         exit(0);
     }
     startSymbol = argv[1][0];
+    
+    if (argc == 3){ // file della grammatica in input
+        inputSource = fopen(argv[2], "r");
+    }
 
     // estendi la grammatica P a P' : grammatica con aggiunta la produzione K -> startSymbol. K deve essere un fresh symbol.
     // Si controlla che K sia un fresh symbol utilizzando la funzione updateFreshSymbol dopo aver letto tutte le produzioni possibili.
@@ -439,7 +442,7 @@ int main(int argc, char** argv){
     addProduction(grammar, fresh_production, &productions_count);
 
     // leggo le produzioni una ad una
-    while (fgets(new_production, PRODUCTION_LENGTH, stdin) && new_production[0] != '\n'){
+    while (fgets(new_production, PRODUCTION_LENGTH, inputSource) && new_production[0] != '\n'){
         // rimuovo il carattere newline
         new_production[strlen(new_production) - 1] = '\0';  
 
