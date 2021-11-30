@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
 \usepackage{c/style} % include custom style for C
+\usepackage{amsmath}
 
 \title{Generazione automa caratteristico parsing bottom-up LR(0) }
 \author{
@@ -132,6 +133,63 @@ Riportiamo per completezza il codice per definire l'automa
 \section{Input e Output}
 
 \subsection{Input}
+La procedura di generazione dell'automa caratteristico assume che sia fornita una grammatica in input seguendo una particolari sintassi. Esistono due modi per fornire la grammatica:
+\begin{enumerate}
+\item Input da parte dell'utente
+\item Input da file
+\end{enumerate}
+
+Entrambi questi metodi assumono che l'input sia fornito in un formato standard come specificato nel prossimo paragrafo.
+
+\subsubsection{Formato input}\label{inputformat}
+La grammatica fornita dall'utente dovrà rispettare le seguenti regole sintattiche:
+\begin{enumerate}
+\item Ogni produzione dovrà essere della forma \texttt{A -> $\alpha$} dove A è un non terminale e $\alpha$ è un insieme di simboli terminali e non terminali. 
+\item driver e body delle produzioni dovranno essere separati da due caratteri "trattino" e "maggiore" formando il simbolo \texttt{->} 
+\item ogni letterale della grammatica, terminale o non terminale che sia, sarà rappresentato da un singolo carattere. Ad esempio se si volesse rappresentare il terminale $digit$ saremo costretti a utilizzare un solo carattere $d$. La sequenza $digit$ altrimenti verrebbe interpretata come 5 terminali
+\item non facendo parte dello standard ascii supportato dal linguaggio C, il carattere $\epsilon$ verrà rappresentato dal carattere $\sim$.
+La produzione $A \to \epsilon$ verrà quindi rappresentata come \texttt{A -> $\sim$}
+\item ogni spazio inserito nelle produzioni verrà rimosso in modo da evitare che il carattere di spaziatura sia considerato un terminale.
+
+\end{enumerate} 
+
+\subsubsection{Input da parte dell'utente}
+L'utente eseguirà il programma e dopo aver passato lo start symbol della grammatica come parametro dovrà inserire manualmente ogni singola produzione separata da un carattere "a capo". Per terminare l'inserimento si dovrà semplicemente cliccare il tasto "Enter" dopo aver inserito l'ultima produzione. Ogni produzione dovrà rispettare lo standard specificato della sezione \ref{inputformat}.\\
+
+\paragraph{Esempio}
+Supponiamo di avere in input la seguente grammatica avente come start symbol $S$ e di voler generare l'automa caratteristico associato.
+\begin{align*}
+    S \to aABe \\
+	A \to Abc \mid b \\
+	B \to d 
+\end{align*}
+
+L'utente eseguirà il programma compilato passando lo start symbol S e le produzioni una per volta come nel seguente frammento estratto dalla shell
+\lstinputlisting[language=C,style=c]{bash_fragments/user_input.bash}
+
+
+\subsubsection{Input da file}
+In alternativa all'input manuale delle produzioni, l'utente potrà specificare un file di input contenente la grammatica utilizzando due metodi diversi:
+\begin{enumerate}
+\item parametro al programma
+\item ridirezione dell'input
+\end{enumerate}
+
+Descriviamo entrambe le alternative
+\paragraph{1. Parametro del programma} L'utente fornisce un secondo ulteriore parametro al programma contenente la posizione del file di input. 
+
+\subparagraph{Esempio}
+Supponiamo di avere in input la stessa grammatica dell'esempio precedente per l'input da parte dell'utente. In questo caso però assumiamo che la grammatica sia memorizzata in un file di testo nella cartella "test\_grammars" chiamato "grammar5.txt"\\
+
+L'utente eseguirà il programma compilato passando lo start symbol S e la posizione del file come riportato nell'estratto di codice qui sotto
+\lstinputlisting[language=C,style=c]{bash_fragments/file_input_parameter.bash}
+
+\paragraph{2. Ridirezione dell'input}L'utente utilizzando l'operatore di ridirezione $>$ fornito dal linguaggio bash su GNU/Linux ridireziona il contenuto del file contenente la grammatica allo standard input del programma. 
+
+\subparagraph{Esempio}
+Anche in questo caso supponiamo di avere in input la grammatica "grammar5.txt" dell'esempio precedente. L'utente eseguirà il programma compilato passando lo start symbol S e ridezionerà il contenuto del file della grammatica al programma come nel seguente frammento di codice estratto dalla shell
+\lstinputlisting[language=C,style=c]{bash_fragments/file_input.bash}
+
 
 \subsection{Output}
 
