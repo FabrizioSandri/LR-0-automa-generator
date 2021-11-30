@@ -169,13 +169,27 @@ L'utente eseguirà il programma compilato passando lo start symbol S e le produz
 
 
 \subsubsection{Input da file}
-L'utente utilizzando l'operatore di redirezione $>$ fornito dal linguaggio bash su GNU/Linux ridireziona il contenuto del file contenente la grammatica allo standard input del programma. Come nel caso precedente ogni produzione dovrà rispettare lo standard specificato della sezione  \ref{inputformat}.
+In alternativa all'input manuale delle produzioni, l'utente potrà specificare un file di input contenente la grammatica utilizzando due metodi diversi:
+\begin{enumerate}
+\item parametro al programma
+\item ridirezione dell'input
+\end{enumerate}
 
-\paragraph{Esempio}
+Descriviamo entrambe le alternative
+\paragraph{1. Parametro del programma} L'utente fornisce un secondo ulteriore parametro al programma contenente la posizione del file di input. 
+
+\subparagraph{Esempio}
 Supponiamo di avere in input la stessa grammatica dell'esempio precedente per l'input da parte dell'utente. In questo caso però assumiamo che la grammatica sia memorizzata in un file di testo nella cartella "test\_grammars" chiamato "grammar5.txt"\\
 
-L'utente eseguirà il programma compilato passando lo start symbol S e ridezionerà il contenuto del file della grammatica al programma come nel seguente frammento di codice estratto dalla shell
+L'utente eseguirà il programma compilato passando lo start symbol S e la posizione del file come riportato nell'estratto di codice qui sotto
+\lstinputlisting[language=C,style=c]{bash_fragments/file_input_parameter.bash}
+
+\paragraph{2. Ridirezione dell'input}L'utente utilizzando l'operatore di ridirezione $>$ fornito dal linguaggio bash su GNU/Linux ridireziona il contenuto del file contenente la grammatica allo standard input del programma. 
+
+\subparagraph{Esempio}
+Anche in questo caso supponiamo di avere in input la grammatica "grammar5.txt" dell'esempio precedente. L'utente eseguirà il programma compilato passando lo start symbol S e ridezionerà il contenuto del file della grammatica al programma come nel seguente frammento di codice estratto dalla shell
 \lstinputlisting[language=C,style=c]{bash_fragments/file_input.bash}
+
 
 \subsection{Output}
 
