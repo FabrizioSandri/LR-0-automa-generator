@@ -1,0 +1,44 @@
+Il nuovo fresh Symbol e': K
+============== GRAMMATICA ===============
+K -> S
+S -> aABe
+A -> b
+A -> Abc
+B -> d
+============== TRANSIZIONI ==============
+Tau (0, S) = 1 
+Tau (0, a) = 2 
+Tau (2, A) = 3 
+Tau (2, b) = 4 
+Tau (3, B) = 5 
+Tau (3, b) = 6 
+Tau (3, d) = 7 
+Tau (5, e) = 8 
+Tau (6, c) = 9 
+=========== ITEMS NEGLI STATI ===========
+++++++++++ STATO 0 
+K -> .S
+S -> .aABe
+++++++++++ STATO 1 Stato di accept
+K -> S.
+++++++++++ STATO 2 
+S -> a.ABe
+A -> .b
+A -> .Abc
+++++++++++ STATO 3 
+S -> aA.Be
+A -> A.bc
+B -> .d
+++++++++++ STATO 4 Stato finale
+A -> b.
+++++++++++ STATO 5 
+S -> aAB.e
+++++++++++ STATO 6 
+A -> Ab.c
+++++++++++ STATO 7 Stato finale
+B -> d.
+++++++++++ STATO 8 Stato finale
+S -> aABe.
+++++++++++ STATO 9 Stato finale
+A -> Abc.
+
