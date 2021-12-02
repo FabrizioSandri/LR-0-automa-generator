@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
 \usepackage{c/style} % include custom style for C
+\usepackage{plain/plain_style} % include custom style for plain text
 \usepackage{amsmath}
 
 \title{Generazione automa caratteristico parsing bottom-up LR(0) }
@@ -91,7 +92,7 @@ A livello implementativo un modo efficiente per implementare un Item LR(0) è qu
 Riportiamo ora il codice utilizzato per rappresentare gli Item LR(0).
 \lstinputlisting[language=C,style=c]{c/fragments/lr0_item.c}
 
-\subsection{Funzione di transizione}
+\subsection{Funzione di transizione}\label{tau}
 La funzione di transizione associa ad una coppia (stato, letterale) un altro stato. Se diciamo S gli stati dell'automa caratteristico e V il vocabolario della grammatica considerata allora definiamo formalmente la funzione di transizione come
 $$
 \tau \colon (S, V) \to S
@@ -192,6 +193,36 @@ Anche in questo caso supponiamo di avere in input la grammatica "grammar5.txt" d
 
 
 \subsection{Output}
+In output il programma ritornerà a video l'automa caratteristico con tutte le informazioni ad esso annesse. Descriviamo nei prossimi paragrafi le informazioni restituite in output dall'esecuzione del programma sulla seguente grammatica: 
+\begin{align*}
+    S \to aABe \\
+	A \to Abc \mid b \\
+	B \to d 
+\end{align*}
+
+\lstinputlisting[style=plain]{plain/output.txt}
+
+Come si evince dal listato sopra, l'output sarà diviso in 3 parti:
+
+\begin{enumerate}
+\item Grammatica: la prima parte conterrà la grammatica letta in input con aggiunta la fresh production generata a partire dal nuovo fresh symbol(specificato a linea 1) e dallo start symbol passato come parametro.
+
+\paragraph{NOTA:}il fresh symbol viene calcolato in automatico a partire da una lista di non terminali (lettere dell'alfabeto da A a Z, solitamente la scelta ricade sulla lettera K in quanto le lettere A, B e C sono spesso presenti nelle grammatiche che abbiamo visto, riducendo il numero di tentativi necessari per cercare un nuovo non terminale).
+
+\item Transizioni : la seconda parte contiene una lista di transizioni dai vari stati, rispettando la definizione di funzione di transizione vista nella sezione \ref{tau}.
+\paragraph{Esempio: } \texttt{Tau(0,S) = 1} indica una transizione dallo stato 0 allo stato 1 tramite il non terminale S.
+
+\item Items degli stati: per ogni stato dell'automa caratteristico vengono stampati il valore identificativo dello stato, il tipo di stato e i rispettivi items che lo compongono. \\
+
+Il tipo di stato può assumere un valore fra i seguenti:
+\begin{list}{-}{}
+\item finale : sono marcati come finali tutti gli stati che contengono almeno un reducing item;
+\item accept : esiste un solo stato di accept ed è lo stato contenente il reducing item per la fresh production;
+\item normale : qualsiasi altro stato che non contiene alcun reducing item.
+\end{list}
+
+\end{enumerate}
+
 
 \section{Testing}
 
