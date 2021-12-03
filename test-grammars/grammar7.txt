@@ -1,3 +1,2 @@
-S -> AaB | b
-A -> BcBaA | ~
-B -> ~
+E -> E + T  | E - T | T
+T -> (E) | i | n

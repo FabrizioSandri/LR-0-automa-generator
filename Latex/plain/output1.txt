@@ -41,4 +41,3 @@ B -> d.
 S -> aABe.
 ++++++++++ STATO 9 Stato finale
 A -> Abc.
-

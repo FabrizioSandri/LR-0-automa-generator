@@ -4,6 +4,7 @@
 \usepackage{c/style} % include custom style for C
 \usepackage{plain/plain_style} % include custom style for plain text
 \usepackage{amsmath}
+\usepackage{graphicx}
 
 \title{Generazione automa caratteristico parsing bottom-up LR(0) }
 \author{
@@ -192,7 +193,7 @@ Anche in questo caso supponiamo di avere in input la grammatica "grammar5.txt" d
 \lstinputlisting[language=C,style=c]{bash_fragments/file_input.bash}
 
 
-\subsection{Output}
+\subsection{Output}\label{output}
 In output il programma ritornerà a video l'automa caratteristico con tutte le informazioni ad esso annesse. Descriviamo nei prossimi paragrafi le informazioni restituite in output dall'esecuzione del programma sulla seguente grammatica: 
 \begin{align*}
     S \to aABe \\
@@ -200,7 +201,7 @@ In output il programma ritornerà a video l'automa caratteristico con tutte le i
 	B \to d 
 \end{align*}
 
-\lstinputlisting[style=plain]{plain/output.txt}
+\lstinputlisting[style=plain]{plain/output1.txt}
 
 Come si evince dal listato sopra, l'output sarà diviso in 3 parti:
 
@@ -225,6 +226,49 @@ Il tipo di stato può assumere un valore fra i seguenti:
 
 
 \section{Testing}
+Per testare l'effettivo funzionamento dell'algoritmo si è deciso di procedere eseguendo dei test di difficoltà incrementale, partendo da grammatiche semplici composte da poche produzioni fino ad arrivare a grammatiche costituite da più produzioni con lo stesso driver separate da $\mid$ e con l'aggiunta di produzioni con body uguale a $\epsilon$.\\
+
+Nella directory \texttt{test\_grammars} sono presenti alcune grammatiche d'esempio viste a lezione. Queste ultime sono state testate una ad una producendo dei risultati corretti e in linea con gli automi caratteristici generati a lezione, a meno dell'ordinamento di assegnazione dei nomi agli stati. Riportiamo in seguito il risultato dell'esecuzione su alcune di esse.
+
+
+\subsection{Grammatica 1}
+La prima grammatica che testeremo è una grammatica molto semplice costituita da 4 produzioni. In questo caso vediamo in azione le potenzialità dell'operatore di unione $\mid$ il quale ci permette di scrivere più produzioni con lo stesso driver sulla stessa riga. \\
+
+Riportiamo per completezza la grammatica in questione:
+\lstinputlisting[style=plain]{../test-grammars/grammar1.txt}
+
+L'esecuzione del programma su questa grammatica genera in output l'automa caratteristico descritto secondo il formato specificato nella sezione dedicata all'interpretazione dell'output(Sezione \ref{output}).
+\lstinputlisting[style=plain]{plain/output1.txt}
+\begin{figure}[h]
+  \includegraphics[height=6cm, keepaspectratio]{assets/automa1.png}
+  \caption{Automa caratteristico per la Grammatica in questione}
+  \label{fig:automa1}
+\end{figure}
+
+\subsection{Grammatica 2}
+La seconda grammatica descrive della banali operazioni di somma e moltiplicazione. Riportiamo la grammatica in questione:
+\lstinputlisting[style=plain]{../test-grammars/grammar2.txt}
+
+L'esecuzione del programma su questa grammatica genera in output l'automa caratteristico descritto secondo il formato specificato nella sezione dedicata all'interpretazione dell'output(Sezione \ref{output}).
+\lstinputlisting[style=plain]{plain/output2.txt}
+\begin{figure}[h]
+  \includegraphics[height=9cm, keepaspectratio]{assets/automa2.png}
+  \caption{Automa caratteristico per la Grammatica in questione}
+  \label{fig:automa1}
+\end{figure}
+
+
+\subsection{Grammatica 3}
+La terza grammatica è simile alla grammatica 3 ma con l'aggiunta delle parentesi. Sarà ora possibile combinare espressioni multiple e separarle utilizzando delle parentesizzazioni. Riportiamo per completezza la grammatica in questione:
+\lstinputlisting[style=plain]{../test-grammars/grammar3.txt}
+
+L'esecuzione del programma su questa grammatica genera in output l'automa caratteristico descritto nel seguente listato
+\lstinputlisting[style=plain]{plain/output3.txt}
+\begin{figure}[h]
+  \includegraphics[height=13cm, keepaspectratio]{assets/automa3.png}
+  \caption{Automa caratteristico per la Grammatica in questione}
+  \label{fig:automa1}
+\end{figure}
 
 
 
