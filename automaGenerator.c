@@ -301,7 +301,6 @@ int generateAutomaChar(struct automa_state* automa, struct production* grammar, 
     // le seguenti due variabili servono per tenere traccia del numero di nuovi stati aggiunti a partire da ogni stato :
     // in particolare serviranno per evitare di creare un nuovo stato se esistesse gia
     char alreadyAddedNextChar[MAX_AUTOMA_STATES_COUNT];
-    int addedStates = 0;
 
     //////////////// INIZIALIZZAZIONE /////////////////
     // aggiunta all'automa dello stato 0 con il suo kernel
@@ -334,28 +333,27 @@ int generateAutomaChar(struct automa_state* automa, struct production* grammar, 
         
         for (int i=0; i<automa[unmarkedStateId].items_count; i++){ // aggiunta delle transizioni a partire dagli stati unmarked
 
-            // production e una produzione dello stato unmarked
             struct lr0_item item = automa[unmarkedStateId].items[i];
 
             int marker_pos = item.marker_position;
             if (marker_pos < strlen(item.prod.body) && item.prod.body[marker_pos] != EPSILON){ // se il marker non è in ultima posizione e non e' una transizione tramite epsilon
-                bool alreadyAddedState = false;
                 char nextChar = item.prod.body[marker_pos];
 
-                // duplicateStateOffset contiene l'offset dello stato uguale a partire dagli stati gia aggiunti per lo stato attuale preso in considerazione
-                int duplicateStateOffset;
-                // alreadyAddedStateId contiene l'indice dello stato convertito a partire dall'offset duplicateStateOffset
-                int alreadyAddedStateId;
-                for (duplicateStateOffset=0; duplicateStateOffset<addedStates; duplicateStateOffset++){
-                    if (nextChar == alreadyAddedNextChar[duplicateStateOffset]){
-                        alreadyAddedState = true;  // lo stato verso questo carattere e' gia stato inserito
+                // alreadyAddedStateId contiene l'id dello stato gia inserito
+                int alreadyAddedStateId = -1;
+                for (int tr=0; tr<automa[unmarkedStateId].transition_count; tr++){
+                    if (nextChar == automa[unmarkedStateId].transitions[tr].by){ // lo stato verso questo carattere e' gia stato inserito
+                        alreadyAddedStateId = automa[unmarkedStateId].transitions[tr].destination; 
                         break;
                     }
                 }
 
 
-                int kernelEqualTo = getKernelEqualTo(automa, totalStates, unmarkedStateId, nextChar);
-                if (kernelEqualTo != -1){ // kernel gia presente, aggiungi solo la transizione verso lo stato specificato da kernelEqualTo
+                int kernelEqualTo = -1;
+                if (alreadyAddedStateId != -1){ // se lo stato destinazione esiste gia allora aggiungo semplicemente la produzione al kernel 
+                    addItemToKernel(&automa[alreadyAddedStateId], &item); // aggiunta produzione al kernel dello stato gia essitente
+                }else if ( (kernelEqualTo = getKernelEqualTo(automa, totalStates, unmarkedStateId, nextChar)) != -1){ // kernel gia presente, aggiungi solo la transizione verso lo stato specificato da kernelEqualTo
+
                     struct transition newTransition = {
                         .from = unmarkedStateId,
                         .by = item.prod.body[marker_pos],  // il prossimo simbolo
@@ -366,11 +364,7 @@ int generateAutomaChar(struct automa_state* automa, struct production* grammar, 
                     printf("Tau (%d, %c) = %d \n", newTransition.from, newTransition.by, newTransition.destination);
                     automa[unmarkedStateId].transitions[automa[unmarkedStateId].transition_count++] = newTransition;
 
-                } else if (alreadyAddedState){ // se lo stato destinazione esiste gia allora aggiungo semplicemente la produzione al kernel 
-                    alreadyAddedStateId = totalStates - addedStates + duplicateStateOffset;  
-                    addItemToKernel(&automa[alreadyAddedStateId], &item); // aggiunta produzione al kernel dello stato gia essitente
                 }else{
-                    alreadyAddedNextChar[addedStates++] = item.prod.body[marker_pos];
 
                     struct transition newTransition = {
                         .from = unmarkedStateId,
@@ -406,7 +400,6 @@ int generateAutomaChar(struct automa_state* automa, struct production* grammar, 
 
         }
 
-        addedStates = 0;  // reset del numero di nonTerminali gia aggiunti
         unmarkedStateId++;
     }
 
