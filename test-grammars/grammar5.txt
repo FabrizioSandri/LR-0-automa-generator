@@ -1,3 +1,3 @@
-S -> aABe
-A -> Abc | b
-B -> d
+S -> L = R | R
+L -> *R | i
+R -> L

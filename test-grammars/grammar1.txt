@@ -1,5 +1,3 @@
 S -> aABe
-A -> Abc
-A -> b
+A -> Abc | b
 B -> d
-
