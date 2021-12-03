@@ -201,7 +201,7 @@ In output il programma ritornerà a video l'automa caratteristico con tutte le i
 	B \to d 
 \end{align*}
 
-\lstinputlisting[style=plain]{plain/output.txt}
+\lstinputlisting[style=plain]{plain/output1.txt}
 
 Come si evince dal listato sopra, l'output sarà diviso in 3 parti:
 
@@ -252,10 +252,24 @@ La seconda grammatica descrive della banali operazioni di somma e moltiplicazion
 L'esecuzione del programma su questa grammatica genera in output l'automa caratteristico descritto secondo il formato specificato nella sezione dedicata all'interpretazione dell'output(Sezione \ref{output}).
 \lstinputlisting[style=plain]{plain/output2.txt}
 \begin{figure}[h]
-  \includegraphics[height=8cm, keepaspectratio]{assets/automa2.png}
+  \includegraphics[height=9cm, keepaspectratio]{assets/automa2.png}
   \caption{Automa caratteristico per la Grammatica in questione}
   \label{fig:automa1}
 \end{figure}
+
+
+\subsection{Grammatica 3}
+La terza grammatica è simile alla grammatica 3 ma con l'aggiunta delle parentesi. Sarà ora possibile combinare espressioni multiple e separarle utilizzando delle parentesizzazioni. Riportiamo per completezza la grammatica in questione:
+\lstinputlisting[style=plain]{../test-grammars/grammar3.txt}
+
+L'esecuzione del programma su questa grammatica genera in output l'automa caratteristico descritto nel seguente listato
+\lstinputlisting[style=plain]{plain/output3.txt}
+\begin{figure}[h]
+  \includegraphics[height=13cm, keepaspectratio]{assets/automa3.png}
+  \caption{Automa caratteristico per la Grammatica in questione}
+  \label{fig:automa1}
+\end{figure}
+
 
 
 
