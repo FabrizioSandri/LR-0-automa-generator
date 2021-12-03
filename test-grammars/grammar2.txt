@@ -1,3 +1,1 @@
-E -> E+E
-E -> E*E
-E -> i
+E -> E+E | E*E | i
