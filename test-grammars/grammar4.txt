@@ -1,6 +1,3 @@
-S -> aAd
-S -> bBd
-S -> aBe
-S -> bAe
+S -> aAd | bBd | aBe | bAe
 A -> c
 B -> c
