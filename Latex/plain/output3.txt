@@ -2,80 +2,79 @@ Il nuovo fresh Symbol e': K
 ============== GRAMMATICA ===============
 K -> E
 E -> T
+E -> E-T
 E -> E+T
-T -> F
-T -> T*F
-F -> i
-F -> (E)
+T -> n
+T -> i
+T -> (E)
 ============== TRANSIZIONI ==============
 Tau (0, E) = 1 
 Tau (0, T) = 2 
-Tau (0, F) = 3 
+Tau (0, n) = 3 
 Tau (0, i) = 4 
 Tau (0, () = 5 
-Tau (1, +) = 6 
-Tau (2, *) = 7 
+Tau (1, -) = 6 
+Tau (1, +) = 7 
 Tau (5, E) = 8 
 Tau (5, T) = 2 
-Tau (5, F) = 3 
+Tau (5, n) = 3 
 Tau (5, i) = 4 
 Tau (5, () = 5 
 Tau (6, T) = 9 
-Tau (6, F) = 3 
+Tau (6, n) = 3 
 Tau (6, i) = 4 
 Tau (6, () = 5 
-Tau (7, F) = 10 
+Tau (7, T) = 10 
+Tau (7, n) = 3 
 Tau (7, i) = 4 
 Tau (7, () = 5 
 Tau (8, )) = 11 
-Tau (8, +) = 6 
-Tau (9, *) = 7 
+Tau (8, -) = 6 
+Tau (8, +) = 7 
 =========== ITEMS NEGLI STATI ===========
 ++++++++++ STATO 0 
 K -> .E
 E -> .T
+E -> .E-T
 E -> .E+T
-T -> .F
-T -> .T*F
-F -> .i
-F -> .(E)
+T -> .n
+T -> .i
+T -> .(E)
 ++++++++++ STATO 1 Stato di accept
 K -> E.
+E -> E.-T
 E -> E.+T
 ++++++++++ STATO 2 Stato finale
 E -> T.
-T -> T.*F
-T -> T.*F
 ++++++++++ STATO 3 Stato finale
-T -> F.
+T -> n.
 ++++++++++ STATO 4 Stato finale
-F -> i.
+T -> i.
 ++++++++++ STATO 5 
-F -> (.E)
+T -> (.E)
 E -> .T
+E -> .E-T
 E -> .E+T
-T -> .F
-T -> .T*F
-F -> .i
-F -> .(E)
+T -> .n
+T -> .i
+T -> .(E)
 ++++++++++ STATO 6 
-E -> E+.T
-T -> .F
-T -> .T*F
-F -> .i
-F -> .(E)
+E -> E-.T
+T -> .n
+T -> .i
+T -> .(E)
 ++++++++++ STATO 7 
-T -> T*.F
-F -> .i
-F -> .(E)
+E -> E+.T
+T -> .n
+T -> .i
+T -> .(E)
 ++++++++++ STATO 8 
-F -> (E.)
+T -> (E.)
+E -> E.-T
 E -> E.+T
 ++++++++++ STATO 9 Stato finale
-E -> E+T.
-T -> T.*F
+E -> E-T.
 ++++++++++ STATO 10 Stato finale
-T -> T*F.
+E -> E+T.
 ++++++++++ STATO 11 Stato finale
-F -> (E).
-
+T -> (E).
