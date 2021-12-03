@@ -391,7 +391,7 @@ int generateAutomaChar(struct automa_state* automa, struct production* grammar, 
 
                 
             }else{ // marker in ultima posizione : reducing item (mark dello stato come stato finale oppure accept)
-                if (item.prod.body[marker_pos - 1] == startSymbol){
+                if (item.prod.body[marker_pos - 1] == startSymbol && item.prod.driver==automa[0].items[0].prod.driver){
                     automa[unmarkedStateId].type = accept;
                 }else{
                     automa[unmarkedStateId].type = final;
