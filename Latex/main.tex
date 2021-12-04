@@ -143,7 +143,7 @@ La procedura di generazione dell'automa caratteristico assume che sia fornita un
 
 Entrambi questi metodi assumono che l'input sia fornito in un formato standard come specificato nel prossimo paragrafo.
 
-\subsubsection{Formato input}\label{inputformat}
+\subsubsection{Formato input}\label{sec:inputformat}
 La grammatica fornita dall'utente dovrà rispettare le seguenti regole sintattiche:
 \begin{enumerate}
 \item Ogni produzione dovrà essere della forma \texttt{A -> $\alpha$} dove A è un non terminale e $\alpha$ è un insieme di simboli terminali e non terminali. 
@@ -156,7 +156,7 @@ La produzione $A \to \epsilon$ verrà quindi rappresentata come \texttt{A -> $\s
 \end{enumerate} 
 
 \subsubsection{Input da parte dell'utente}
-L'utente eseguirà il programma e dopo aver passato lo start symbol della grammatica come parametro dovrà inserire manualmente ogni singola produzione separata da un carattere "a capo". Per terminare l'inserimento si dovrà semplicemente cliccare il tasto "Enter" dopo aver inserito l'ultima produzione. Ogni produzione dovrà rispettare lo standard specificato della sezione \ref{inputformat}.\\
+L'utente eseguirà il programma e dopo aver passato lo start symbol della grammatica come parametro dovrà inserire manualmente ogni singola produzione separata da un carattere "a capo". Per terminare l'inserimento si dovrà semplicemente cliccare il tasto "Enter" dopo aver inserito l'ultima produzione. Ogni produzione dovrà rispettare lo standard specificato della sezione \ref{sec:inputformat}.\\
 
 \paragraph{Esempio}
 Supponiamo di avere in input la seguente grammatica avente come start symbol $S$ e di voler generare l'automa caratteristico associato.
@@ -273,7 +273,7 @@ L'esecuzione del programma su questa grammatica genera in output l'automa caratt
 \subsection{Grammatica 6}
 Riportiamo l'output della Grammatica 6, tralasciando la grammatica 4 e e la grammatica dei puntatori 5 per non appesantire troppo il report: il lettore può eseguire in autonomia il programma per la generazione dell'automa caratteristico applicato alle grammatiche suddette.\\
 
-La grammatica 6 viene riportata in questo report in quanto contiene delle $\epsilon$-produzioni e come specificato nelle sezione \ref{inputformat} dedicata al Formato dell'Input le $\epsilon$-produzioni dovranno essere scritte utilizzando il simbolo 
+La grammatica 6 viene riportata in questo report in quanto contiene delle $\epsilon$-produzioni e come specificato nelle sezione \ref{sec:inputformat} dedicata al Formato dell'Input le $\epsilon$-produzioni dovranno essere scritte utilizzando il simbolo 
 $\sim$. \\
 
 Riportiamo la grammatica in questione:
@@ -289,5 +289,13 @@ sono state riscritte rispettivamente come
 \texttt{A -> $\sim$} \\
 \texttt{B -> $\sim$}
 \end{align*}
+
+L'esecuzione genererà l'output del seguente listato
+\lstinputlisting[style=plain]{plain/output6.txt}
+\begin{figure}[h]
+  \includegraphics[height=7cm, keepaspectratio]{assets/automa6.png}
+  \caption{Automa caratteristico per la Grammatica in questione}
+  \label{fig:automa1}
+\end{figure}
 
 \end{document}
