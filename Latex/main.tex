@@ -270,8 +270,24 @@ L'esecuzione del programma su questa grammatica genera in output l'automa caratt
   \label{fig:automa1}
 \end{figure}
 
+\subsection{Grammatica 6}
+Riportiamo l'output della Grammatica 6, tralasciando la grammatica 4 e e la grammatica dei puntatori 5 per non appesantire troppo il report: il lettore può eseguire in autonomia il programma per la generazione dell'automa caratteristico applicato alle grammatiche suddette.\\
 
+La grammatica 6 viene riportata in questo report in quanto contiene delle $\epsilon$-produzioni e come specificato nelle sezione \ref{inputformat} dedicata al Formato dell'Input le $\epsilon$-produzioni dovranno essere scritte utilizzando il simbolo 
+$\sim$. \\
 
+Riportiamo la grammatica in questione:
+\lstinputlisting[style=plain]{../test-grammars/grammar6.txt}
 
+Come possiamo vedere le produzioni 
+\begin{align*}
+\texttt{A -> $\epsilon$} \\
+\texttt{B -> $\epsilon$}
+\end{align*}
+sono state riscritte rispettivamente come 
+\begin{align*}
+\texttt{A -> $\sim$} \\
+\texttt{B -> $\sim$}
+\end{align*}
 
 \end{document}
