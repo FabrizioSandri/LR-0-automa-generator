@@ -157,10 +157,10 @@ void addItemToClosure(struct automa_state* destinationState, struct lr0_item* it
     int itemsInDestination = destinationState->items_count;
 
     // controllo che l'item non sia gia presente nella closure. Un elemento e gia presente nella closure se ha lo stesso identificativo (stesso driver e stesso body)
-    // e se la posizione del marker e' la stessa
+    // e se la posizione del marker del nuovo item da inserire e' pari a 0
     bool alreadyIn = false;
     for (int i=0; i<itemsInDestination; i++){
-        if (destinationState->items[i].prod.production_id == item->prod.production_id && destinationState->items[i].marker_position == item->marker_position ){
+        if (destinationState->items[i].prod.production_id == item->prod.production_id && destinationState->items[i].marker_position == 0 ){
             alreadyIn = true;
             break;
         }
@@ -181,10 +181,10 @@ void addItemToKernel(struct automa_state* destinationState, struct lr0_item* ite
     int itemsInDestination = destinationState->items_count;
 
     // controllo che l'item non sia gia presente nella closure. Un elemento e gia presente nella closure se ha lo stesso identificativo (stesso driver e stesso body)
-    // e se la posizione del marker e' la stessa
+    // e se la posizione del marker e' la stessa + 1 (la produzione aggiunta avra il marker spostato in avanti di una posizione)
     bool alreadyIn = false;
     for (int i=0; i<itemsInDestination; i++){
-        if (destinationState->items[i].prod.production_id == item->prod.production_id && destinationState->items[i].marker_position == item->marker_position ){
+        if (destinationState->items[i].prod.production_id == item->prod.production_id && destinationState->items[i].marker_position == item->marker_position + 1 ){
             alreadyIn = true;
             break;
         }
