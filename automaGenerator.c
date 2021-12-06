@@ -489,6 +489,12 @@ int main(int argc, char** argv){
             if (item->marker_position == strlen(item->prod.body)){ // marker in ultima posizione
                 printf(".");
             }
+
+            if (item->isKernelProduction){ // item facente parte del kernel
+                if (strlen(item->prod.body) == 1)
+                    printf("\t");
+                printf("\t[ K ]");
+            }
             
             printf("\n");
         }

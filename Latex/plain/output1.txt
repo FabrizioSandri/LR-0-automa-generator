@@ -17,27 +17,27 @@ Tau (5, e) = 8
 Tau (6, c) = 9 
 =========== ITEMS NEGLI STATI ===========
 ++++++++++ STATO 0 
-K -> .S
+K -> .S		[ K ]
 S -> .aABe
 ++++++++++ STATO 1 Stato di accept
-K -> S.
+K -> S.		[ K ]
 ++++++++++ STATO 2 
-S -> a.ABe
+S -> a.ABe	[ K ]
 A -> .b
 A -> .Abc
 ++++++++++ STATO 3 
-S -> aA.Be
-A -> A.bc
+S -> aA.Be	[ K ]
+A -> A.bc	[ K ]
 B -> .d
 ++++++++++ STATO 4 Stato finale
-A -> b.
+A -> b.		[ K ]
 ++++++++++ STATO 5 
-S -> aAB.e
+S -> aAB.e	[ K ]
 ++++++++++ STATO 6 
-A -> Ab.c
+A -> Ab.c	[ K ]
 ++++++++++ STATO 7 Stato finale
-B -> d.
+B -> d.		[ K ]
 ++++++++++ STATO 8 Stato finale
-S -> aABe.
+S -> aABe.	[ K ]
 ++++++++++ STATO 9 Stato finale
-A -> Abc.
+A -> Abc.	[ K ]

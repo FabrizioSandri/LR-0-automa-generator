@@ -19,31 +19,31 @@ Tau (6, *) = 3
 Tau (6, +) = 4 
 =========== ITEMS NEGLI STATI ===========
 ++++++++++ STATO 0 
-K -> .E
+K -> .E		[ K ]
 E -> .i
 E -> .E*E
 E -> .E+E
 ++++++++++ STATO 1 Stato di accept
-K -> E.
-E -> E.*E
-E -> E.+E
+K -> E.		[ K ]
+E -> E.*E	[ K ]
+E -> E.+E	[ K ]
 ++++++++++ STATO 2 Stato finale
-E -> i.
+E -> i.		[ K ]
 ++++++++++ STATO 3 
-E -> E*.E
+E -> E*.E	[ K ]
 E -> .i
 E -> .E*E
 E -> .E+E
 ++++++++++ STATO 4 
-E -> E+.E
+E -> E+.E	[ K ]
 E -> .i
 E -> .E*E
 E -> .E+E
 ++++++++++ STATO 5 Stato finale
-E -> E*E.
-E -> E.*E
-E -> E.+E
+E -> E*E.	[ K ]
+E -> E.*E	[ K ]
+E -> E.+E	[ K ]
 ++++++++++ STATO 6 Stato finale
-E -> E+E.
-E -> E.*E
-E -> E.+E
+E -> E+E.	[ K ]
+E -> E.*E	[ K ]
+E -> E.+E	[ K ]
