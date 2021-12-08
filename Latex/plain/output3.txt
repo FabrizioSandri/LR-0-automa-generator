@@ -33,7 +33,7 @@ Tau (8, -) = 6
 Tau (8, +) = 7 
 =========== ITEMS NEGLI STATI ===========
 ++++++++++ STATO 0 
-K -> .E
+K -> .E		[ K ]
 E -> .T
 E -> .E-T
 E -> .E+T
@@ -41,17 +41,17 @@ T -> .n
 T -> .i
 T -> .(E)
 ++++++++++ STATO 1 Stato di accept
-K -> E.
-E -> E.-T
-E -> E.+T
+K -> E.		[ K ]
+E -> E.-T	[ K ]
+E -> E.+T	[ K ]
 ++++++++++ STATO 2 Stato finale
-E -> T.
+E -> T.		[ K ]
 ++++++++++ STATO 3 Stato finale
-T -> n.
+T -> n.		[ K ]
 ++++++++++ STATO 4 Stato finale
-T -> i.
+T -> i.		[ K ]
 ++++++++++ STATO 5 
-T -> (.E)
+T -> (.E)	[ K ]
 E -> .T
 E -> .E-T
 E -> .E+T
@@ -59,22 +59,22 @@ T -> .n
 T -> .i
 T -> .(E)
 ++++++++++ STATO 6 
-E -> E-.T
+E -> E-.T	[ K ]
 T -> .n
 T -> .i
 T -> .(E)
 ++++++++++ STATO 7 
-E -> E+.T
+E -> E+.T	[ K ]
 T -> .n
 T -> .i
 T -> .(E)
 ++++++++++ STATO 8 
-T -> (E.)
-E -> E.-T
-E -> E.+T
+T -> (E.)	[ K ]
+E -> E.-T	[ K ]
+E -> E.+T	[ K ]
 ++++++++++ STATO 9 Stato finale
-E -> E-T.
+E -> E-T.	[ K ]
 ++++++++++ STATO 10 Stato finale
-E -> E+T.
+E -> E+T.	[ K ]
 ++++++++++ STATO 11 Stato finale
-T -> (E).
+T -> (E).	[ K ]

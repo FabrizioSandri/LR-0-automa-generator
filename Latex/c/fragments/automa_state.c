@@ -1,5 +1,5 @@
 struct automa_state {
-    struct lr0_item items[50];  
+    struct lr0_item items[MAX_STATE_ITEMS];  
     struct transition transitions[AUTOMA_STATES_COUNT];
     
     state_type type;

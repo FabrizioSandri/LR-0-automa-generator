@@ -58,9 +58,9 @@ Analizzeremo nei prossimi paragrafi le decisioni implementative prese per realiz
 \subsection{Produzione}
 La produzione è una struttura dati di base su cui si basa la grammatica, essa è una struttura minimale composta da 3 parti:
 \begin{list}{-}{}
-\item char driver : il driver della produzione ;
-\item char[ ] body : stringa contenente il body della produzione ;
-\item int production\_id : valore intero utilizzato per controllare in maniera efficiente se le produzioni memorizzate in due item distinti sono uguali. Se driver e body di due item distinti avranno lo stesso $production\_id$ vorrà dire che la produzione memorizzata nell'item sarà identica e meno della posizione del marker che può essere differente.
+\item \texttt{char driver} : il driver della produzione ;
+\item \texttt{char[] body} : stringa contenente il body della produzione ;
+\item \texttt{int production\_id} : valore intero utilizzato per controllare in maniera efficiente se le produzioni memorizzate in due item distinti sono uguali a meno della posizione del marker. Se due produzioni distinte avranno lo stesso $production\_id$ vorrà dire che entrambe avranno lo stesso body e lo stesso driver.
 \end{list}
 
 Riportiamo ora il codice utilizzato per rappresentare una produzione.
@@ -85,9 +85,9 @@ Dove il simbolo $\cdot$ indica la posizione del marker all'interno del body dell
 
 A livello implementativo un modo efficiente per implementare un Item LR(0) è quello di utilizzare una struct contenente le seguenti informazioni:
 \begin{list}{-}{}
-\item production prod : la produzione associata all'item e definita sfruttando la definizione di produzione vista in precedenza;
-\item int marker\_position : un valore intero rappresentante la posizione del marker all'interno dell'item;
-\item bool isKernelProduction : settato a true per indicare che un Item fa parte del Kernel di uno stato.
+\item \texttt{production prod} : la produzione associata all'item e definita sfruttando la definizione di produzione vista in precedenza;
+\item \texttt{int marker\_position} : un valore intero rappresentante la posizione del marker all'interno dell'item;
+\item \texttt{bool isKernelProduction} : settato a true per indicare che un Item fa parte del Kernel di uno stato.
 \end{list}
 
 Riportiamo ora il codice utilizzato per rappresentare gli Item LR(0).
@@ -101,9 +101,9 @@ $$
 
 Per poter implementare questa funzione nel modo più semplice ed efficiente possibile adottiamo una struttura avente 3 attributi:
 \begin{list}{-}{}
-\item int from : lo stato origine della transizione
-\item int to : lo stato destinazione della transizione
-\item char by : un letterale equivalente al valore che leggerò nell'input buffer. In altre parole questo sarà il letterale che etichetterà l'arco di transizione 
+\item \texttt{int from} : lo stato origine della transizione ;
+\item \texttt{int to} : lo stato destinazione della transizione ;
+\item \texttt{char by} : un letterale equivalente al valore che leggerò nell'input buffer. In altre parole questo sarà il letterale che etichetterà l'arco di transizione.
 \end{list}
 
 Riportiamo il codice della struttura associata alla funzione di transizione.
@@ -114,12 +114,12 @@ Riportiamo il codice della struttura associata alla funzione di transizione.
 \subsection{Stato dell'automa caratteristico}
 Ogni stato dell'automa caratteristico sarà definito da un identificativo numerico: la posizione nell'array $automa$ definito nella prossima sezione "Automa caratteristico". Descriveremo il singolo stato attraverso i seguenti attributi:
 \begin{list}{-}{}
-\item lr0\_item items[50] : dalla definizione sappiamo che ogni stato dell'automa caratteristico sarà composto da un insieme di LR(0) items, in questo caso definito tramite un array. Alcuni di questi items inoltre faranno parte del kernel dello stato.
-\item transaction transactions[MAX\_AUTOMA\_STATES\_COUNT] : un insieme di transizioni uscenti dallo stato corrente e dirette nel verso degli altri stati. Anche in questo caso sfruttiamo la definizione di $struct transaction$ definita in precedenza.
-\item state\_type type : indica il tipo di stato corrente che può essere uno stato fra i seguenti : $normale$, di $accept$ oppure $finale$.
-\item int items\_count : numero totale di items presenti nello stato(compresi quelli facenti parte del kernel)
-\item int kernel\_items\_count : numero di items che sono parte del kernel. Questa variabile è aggiunta al solo scopo di velocizzare la procedura di controllo della presenza di uno stato con lo stesso kernel nell'automa caratteristico. Se due stati hanno numero di items del kernel diverso, sicuramente non potranno essere uguali e quindi si saltano calcoli aggiuntivi.
-\item int transaction\_count : numero di transizioni uscenti dallo stato
+\item \texttt{lr0\_item items[MAX\_STATE\_ITEMS]} : dalla definizione sappiamo che ogni stato dell'automa caratteristico sarà composto da un insieme di LR(0) items, in questo caso definito tramite un array. Alcuni di questi items inoltre faranno parte del kernel dello stato.
+\item \texttt{transition transitions[MAX\_AUTOMA\_STATES\_COUNT]} : un insieme di transizioni uscenti dallo stato corrente e dirette nel verso degli altri stati. Anche in questo caso sfruttiamo la definizione di \texttt{struct transition} definita in precedenza (Sezione \ref{tau}).
+\item \texttt{state\_type type} : indica la tipologia di stato che può assumere un valore fra i seguenti : $normale$, di $accept$ oppure $finale$.
+\item \texttt{int items\_count} : numero totale di items presenti nello stato(compresi quelli facenti parte del kernel)
+\item \texttt{int kernel\_items\_count} : numero di items che sono parte del kernel. Questa variabile è aggiunta al solo scopo di velocizzare la procedura di controllo della presenza di uno stato con lo stesso kernel nell'automa caratteristico. Se due stati hanno numero di items del kernel diverso, sicuramente non potranno essere uguali e quindi si saltano calcoli aggiuntivi.
+\item \texttt{int transaction\_count} : numero di transizioni uscenti dallo stato
 \end{list}
 
 L'implementazione dello stato dell'automa caratteristico rispecchia esattamente i punti appena visti.
@@ -213,7 +213,8 @@ Come si evince dal listato sopra, l'output sarà diviso in 3 parti:
 \item Transizioni : la seconda parte contiene una lista di transizioni dai vari stati, rispettando la definizione di funzione di transizione vista nella sezione \ref{tau}.
 \paragraph{Esempio: } \texttt{Tau(0,S) = 1} indica una transizione dallo stato 0 allo stato 1 tramite il non terminale S.
 
-\item Items degli stati: per ogni stato dell'automa caratteristico vengono stampati il valore identificativo dello stato, il tipo di stato e i rispettivi items che lo compongono. \\
+\item Items degli stati: per ogni stato dell'automa caratteristico vengono stampati il valore identificativo dello stato, il tipo di stato e i rispettivi items che lo compongono. Per ogni item appartenente ad uno stato, se l'item fa parte del kernel presenterà un simbolo \texttt{[K]} sulla destra.\\
+
 
 Il tipo di stato può assumere un valore fra i seguenti:
 \begin{list}{-}{}

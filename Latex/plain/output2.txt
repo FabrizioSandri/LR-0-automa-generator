@@ -5,45 +5,45 @@ E -> i
 E -> E*E
 E -> E+E
 ============== TRANSIZIONI ==============
-Tau(0, E) = 1
-Tau(0, i) = 2
-Tau(1, *) = 3
-Tau(1, +) = 4
-Tau(3, E) = 5
-Tau(3, i) = 2
-Tau(4, E) = 6
-Tau(4, i) = 2
-Tau(5, *) = 3
-Tau(5, +) = 4
-Tau(6, *) = 3
-Tau(6, +) = 4
+Tau (0, E) = 1 
+Tau (0, i) = 2 
+Tau (1, *) = 3 
+Tau (1, +) = 4 
+Tau (3, E) = 5 
+Tau (3, i) = 2 
+Tau (4, E) = 6 
+Tau (4, i) = 2 
+Tau (5, *) = 3 
+Tau (5, +) = 4 
+Tau (6, *) = 3 
+Tau (6, +) = 4 
 =========== ITEMS NEGLI STATI ===========
 ++++++++++ STATO 0 
-K -> .E
+K -> .E		[ K ]
 E -> .i
 E -> .E*E
 E -> .E+E
 ++++++++++ STATO 1 Stato di accept
-K -> E.
-E -> E.*E
-E -> E.+E
+K -> E.		[ K ]
+E -> E.*E	[ K ]
+E -> E.+E	[ K ]
 ++++++++++ STATO 2 Stato finale
-E -> i.
+E -> i.		[ K ]
 ++++++++++ STATO 3 
-E -> E*.E
+E -> E*.E	[ K ]
 E -> .i
 E -> .E*E
 E -> .E+E
 ++++++++++ STATO 4 
-E -> E+.E
+E -> E+.E	[ K ]
 E -> .i
 E -> .E*E
 E -> .E+E
 ++++++++++ STATO 5 Stato finale
-E -> E*E.
-E -> E.*E
-E -> E.+E
+E -> E*E.	[ K ]
+E -> E.*E	[ K ]
+E -> E.+E	[ K ]
 ++++++++++ STATO 6 Stato finale
-E -> E+E.
-E -> E.*E
-E -> E.+E
+E -> E+E.	[ K ]
+E -> E.*E	[ K ]
+E -> E.+E	[ K ]

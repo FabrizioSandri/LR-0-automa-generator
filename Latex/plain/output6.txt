@@ -20,34 +20,34 @@ Tau (9, A) = 10
 Tau (9, B) = 4 
 =========== ITEMS NEGLI STATI ===========
 ++++++++++ STATO 0 Stato finale
-K -> .S
+K -> .S		[ K ]
 S -> .b
 S -> .AaB
 A -> .
 A -> .BcBaA
 B -> .
 ++++++++++ STATO 1 Stato di accept
-K -> S.
+K -> S.		[ K ]
 ++++++++++ STATO 2 Stato finale
-S -> b.
+S -> b.		[ K ]
 ++++++++++ STATO 3 
-S -> A.aB
+S -> A.aB	[ K ]
 ++++++++++ STATO 4 
-A -> B.cBaA
+A -> B.cBaA	[ K ]
 ++++++++++ STATO 5 Stato finale
-S -> Aa.B
+S -> Aa.B	[ K ]
 B -> .
 ++++++++++ STATO 6 Stato finale
-A -> Bc.BaA
+A -> Bc.BaA	[ K ]
 B -> .
 ++++++++++ STATO 7 Stato finale
-S -> AaB.
+S -> AaB.	[ K ]
 ++++++++++ STATO 8 
-A -> BcB.aA
+A -> BcB.aA	[ K ]
 ++++++++++ STATO 9 Stato finale
-A -> BcBa.A
+A -> BcBa.A	[ K ]
 A -> .
 A -> .BcBaA
 B -> .
 ++++++++++ STATO 10 Stato finale
-A -> BcBaA.
+A -> BcBaA.	[ K ]
