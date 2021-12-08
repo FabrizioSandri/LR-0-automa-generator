@@ -6,6 +6,7 @@
 #define PRODUCTION_BODY_LENGTH 50
 #define PRODUCTION_LENGTH 50
 #define MAX_AUTOMA_STATES_COUNT 100
+#define MAX_STATE_ITEMS 50
 
 #define EPSILON '~'  // il carattere specificato e' un alias per il carattere '\epsilon'
 
@@ -32,7 +33,7 @@ struct transition {
 };
 
 struct automa_state {
-    struct lr0_item items[50];  
+    struct lr0_item items[MAX_STATE_ITEMS];  
     struct transition transitions[MAX_AUTOMA_STATES_COUNT];
     
     state_type type;
