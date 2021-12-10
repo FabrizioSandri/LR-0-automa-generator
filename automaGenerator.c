@@ -438,7 +438,8 @@ int main(int argc, char** argv){
     // leggo le produzioni una ad una
     while (fgets(new_production, PRODUCTION_LENGTH, inputSource) && new_production[0] != '\n'){
         // rimuovo il carattere newline
-        new_production[strlen(new_production) - 1] = '\0';  
+        if (new_production[strlen(new_production) - 1] == '\n')
+            new_production[strlen(new_production) - 1] = '\0';  
 
         if (addProduction(grammar, new_production, &productions_count) == false){ 
             printf("La produzione %s non e' stata inserita in quanto non rispetta lo standard: A -> beta\n", new_production);
