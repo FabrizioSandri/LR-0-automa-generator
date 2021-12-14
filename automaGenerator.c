@@ -3,8 +3,8 @@
 #include <string.h>
 
 #define MAX_GRAMMAR_PRODUCTIONS_NUMBER 50
-#define PRODUCTION_BODY_LENGTH 50
-#define PRODUCTION_LENGTH 50
+#define MAX_PRODUCTION_BODY_LENGTH 50
+#define PRODUCTION_LENGTH 55
 #define MAX_AUTOMA_STATES_COUNT 100
 #define MAX_STATE_ITEMS 50
 
@@ -15,7 +15,7 @@ typedef enum { normal, accept, final } state_type;
 
 struct production {
     char driver;
-    char body[PRODUCTION_BODY_LENGTH];
+    char body[MAX_PRODUCTION_BODY_LENGTH];
     int production_id; // utilizzato per controllare velocemente se una produzione e' uguale ad un altra senza controllare body e driver
 };
 
