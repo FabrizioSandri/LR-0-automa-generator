@@ -293,10 +293,26 @@ sono state riscritte rispettivamente come
 
 L'esecuzione genererà l'output del seguente listato
 \lstinputlisting[style=plain]{plain/output6.txt}
-\begin{figure}[h]
+\clearpage
+\begin{figure}[!h]
   \includegraphics[height=7cm, keepaspectratio]{assets/automa6.png}
   \caption{Automa caratteristico per la Grammatica in questione}
   \label{fig:automa1}
 \end{figure}
+
+\subsection{Grammatica 7}
+Vista la dimensione della grammatica numero 7 (presente nella cartella \texttt{test\_grammars}) e dell'automa caratteristico generato a partire da essa, non riportiamo l'output generato dall'algoritmo di generazione dell'automa caratteristico. \\
+L'esecuzione porta alla generazione di un'automa caratteristico avente 38 stati e un totale di 97 transizioni.
+
+\section{Limiti}
+Come accennato nelle precedenti sezioni di questo documento il programma è limitato dal fatto che ogni elemento del vocabolario, terminale o non terminale che sia, deve essere composto da un solo carattere. Ad esempio per rappresentare il terminale \texttt{id} abbiamo dovuto ricorrere all'utilizzo del singolo carattere \texttt{i}.
+
+\paragraph*{}Vista questa limitazione è apparso subito inutile l'utilizzo di strutture dati di dimensione dinamica allocate in nella memoria heap. Per questo si è invece optato per mantenere il tutto nella memoria stack e porre delle limitazioni riguardo a:
+\begin{list}{-}{}
+\item numero massimo di stati dell'automa caratteristico (100 stati)
+\item numero massimo di produzioni di una grammatica (100 produzioni)
+\item lunghezza massima di una produzione in caratteri (50 caratteri)
+\end{list} 
+
 
 \end{document}
