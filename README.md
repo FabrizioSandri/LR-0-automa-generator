@@ -2,7 +2,7 @@
 
 In questo report si vuole analizzare e implementare la procedura di
 generazione di un automa caratteristico per il parsing bottom-up di tipo
-LR(0). Fra i vari tipi di parsing visti a lezione il quello LR(0) è un
+LR(0). Fra i vari tipi di parsing quello LR(0) è un
 tipo di parsing per cui si legge l'input da sinistra a destra e si
 produce una derivazione di tipo rightmost a partire dalla grammatica
 data in input.
