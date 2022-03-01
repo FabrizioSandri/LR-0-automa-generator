@@ -500,7 +500,8 @@ S -> aABe.	[ K ]
 A -> Abc.	[ K ]
 ```
 
-Automa caratteristico per la Grammatica in questione ![](assets/automa1.png)
+Automa caratteristico per la Grammatica in questione 
+![automa 1](https://github.com/FabrizioSandri/LR-0-automa-generator/blob/main/Latex/assets/automa1.png?raw=true)
 
 ## Grammatica 2
 
@@ -569,7 +570,7 @@ E -> E.+E	[ K ]
 ```
 
 Automa caratteristico per la Grammatica in questione
-![automa](assets/automa2.png)
+![automa 2](https://github.com/FabrizioSandri/LR-0-automa-generator/blob/main/Latex/assets/automa2.png?raw=true)
 
 ## Grammatica 3
 
@@ -670,7 +671,7 @@ E -> E+T.	[ K ]
 T -> (E).	[ K ]
 ```
 Automa caratteristico per la Grammatica in questione
-![automa 3](assets/automa3.png)
+![automa 3](https://github.com/FabrizioSandri/LR-0-automa-generator/blob/main/Latex/assets/automa3.png?raw=true)
 
 ## Grammatica 6
 
@@ -752,7 +753,7 @@ A -> BcBaA.	[ K ]
 ```
 
 Automa caratteristico per la Grammatica in questione 
-![automa 6](assets/automa6.png)
+![automa 6](https://github.com/FabrizioSandri/LR-0-automa-generator/blob/main/Latex/assets/automa6.png?raw=true)
 
 ## Grammatica 7
 
